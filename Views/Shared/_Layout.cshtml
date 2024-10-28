@@ -7,6 +7,9 @@
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate, private" />
+    <meta http-equiv="Pragma" content="no-cache" />
+    <meta http-equiv="Expires" content="-1" />
     <title>@ViewData["Title"]</title>
 
     <!-- Bootstrap CSS -->
@@ -52,48 +55,51 @@
     </style>
 </head>
 <body>
-    <div class="sidebar">
-        <h4>Trang quản lý </h4>
-        @if (User.IsInRole("Admin"))
-        {
-        <a href="@Url.Action("ManageClasses", "Admin")">
-            <i class="bi bi-house-door-fill"></i> Lớp học
-        </a>
-        <a href="@Url.Action("Subjects", "Class")">
-            <i class="bi bi-book-fill"></i> Môn học
-        </a>
-        <a href="@Url.Action("ManageStudents", "Admin")">
-            <i class="bi bi-people-fill"></i> Học viên
-        </a>
-        <a href="@Url.Action("ManageTeachers", "Admin")">
-            <i class="bi bi-person-badge-fill"></i> Giảng viên
-        </a>
-        <a href="@Url.Action("Logout", "Account")">
-            <i class="bi bi-box-arrow-right"></i> Đăng xuất
-        </a>
-        }
-        else if (User.IsInRole("Teacher"))
-        {
-            <a href="@Url.Action("Index", "Teacher")">
+    @if (!ViewData["Title"]?.ToString()?.Contains("Login") ?? true)
+    {
+        <div class="sidebar">
+            <h4>Trang quản lý </h4>
+            @if (User.IsInRole("Admin"))
+            {
+            <a href="@Url.Action("ManageClasses", "Admin")">
                 <i class="bi bi-house-door-fill"></i> Lớp học
             </a>
             <a href="@Url.Action("Subjects", "Class")">
                 <i class="bi bi-book-fill"></i> Môn học
             </a>
-            <a href="@Url.Action("Logout", "Account")">
-                <i class="bi bi-box-arrow-right"></i> Đăng xuất
+            <a href="@Url.Action("ManageStudents", "Admin")">
+                <i class="bi bi-people-fill"></i> Học viên
             </a>
-        }
-        else if (User.IsInRole("Student"))
-        {
-            <a href="@Url.Action("Index", "Student")">
-                <i class="bi bi-house-door-fill"></i> Làm bài kiểm tra
+            <a href="@Url.Action("ManageTeachers", "Admin")">
+                <i class="bi bi-person-badge-fill"></i> Giảng viên
             </a>
             <a href="@Url.Action("Logout", "Account")">
                 <i class="bi bi-box-arrow-right"></i> Đăng xuất
             </a>
-        }
-    </div>
+            }
+            else if (User.IsInRole("Teacher"))
+            {
+                <a href="@Url.Action("Index", "Teacher")">
+                    <i class="bi bi-house-door-fill"></i> Lớp học
+                </a>
+                <a href="@Url.Action("Subjects", "Class")">
+                    <i class="bi bi-book-fill"></i> Môn học
+                </a>
+                <a href="@Url.Action("Logout", "Account")">
+                    <i class="bi bi-box-arrow-right"></i> Đăng xuất
+                </a>
+            }
+            else if (User.IsInRole("Student"))
+            {
+                <a href="@Url.Action("Index", "Student")">
+                    <i class="bi bi-house-door-fill"></i> Làm bài kiểm tra
+                </a>
+                <a href="@Url.Action("Logout", "Account")">
+                    <i class="bi bi-box-arrow-right"></i> Đăng xuất
+                </a>
+            }
+        </div>
+    }
 
     <div class="content">
         @RenderBody()
@@ -104,6 +110,20 @@
     <!-- Icon Bootstrap -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet">
     
+    @if (ViewData["Title"]?.ToString()?.Contains("Login") ?? false)
+    {
+        <script>
+            window.onload = function() {
+                if(window.history.pushState) {
+                    window.history.pushState(null, '', window.location.href);
+                }
+                window.onpopstate = function() {
+                    window.history.pushState(null, '', window.location.href);
+                };
+            }
+        </script>
+    }
+
     @await RenderSectionAsync("Scripts", required: false)
 </body>
 </html>

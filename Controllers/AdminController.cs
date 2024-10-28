@@ -5,10 +5,15 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Qltt.Controllers
 {
-    [Authorize(Roles = "Admin")]
-    public class AdminController(ApplicationDbContext context) : Controller
+    [Authorize]
+    public class AdminController : Controller
     {
-        private readonly ApplicationDbContext _context = context;
+        private readonly ApplicationDbContext _context;
+
+        public AdminController(ApplicationDbContext context)
+        {
+            _context = context;
+        }
 
         public async Task<IActionResult> Index()
         {

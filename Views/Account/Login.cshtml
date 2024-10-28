@@ -31,3 +31,15 @@
 <link href="https://maxcdn.bootstrapcdn.com/bootstrap/5.1.3/css/bootstrap.min.css" rel="stylesheet" />
 <link href="~/css/login.css" rel="stylesheet" /> <!-- Liên kết file CSS riêng cho login -->
 
+@section Scripts {
+    <script>
+        window.onload = function() {
+            if(window.history.pushState) {
+                window.history.pushState(null, '', window.location.href);
+            }
+            window.onpopstate = function() {
+                window.history.pushState(null, '', window.location.href);
+            };
+        }
+    </script>
+}

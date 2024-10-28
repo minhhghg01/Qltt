@@ -140,3 +140,4 @@ C:\Users\Lenovo\Desktop\WorkSpace\Qltt\obj\Debug\net8.0\refint\Qltt.dll
 C:\Users\Lenovo\Desktop\WorkSpace\Qltt\obj\Debug\net8.0\Qltt.pdb
 C:\Users\Lenovo\Desktop\WorkSpace\Qltt\obj\Debug\net8.0\Qltt.genruntimeconfig.cache
 C:\Users\Lenovo\Desktop\WorkSpace\Qltt\obj\Debug\net8.0\ref\Qltt.dll
+C:\Users\Lenovo\Desktop\WorkSpace\Qltt\obj\Debug\net8.0\Qltt.sourcelink.json

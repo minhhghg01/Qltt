@@ -16,9 +16,15 @@ public class AccountController : Controller
         _context = context;
     }
 
-    // GET: Account/Login
+    [AllowAnonymous]
+    [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
     public IActionResult Login()
     {
+        // Kiểm tra nếu user đã đăng nhập thì chuyển hướng
+        if (User.Identity?.IsAuthenticated ?? false)
+        {
+            return RedirectToAction("Index", "Home");
+        }
         return View();
     }
 
@@ -62,9 +68,23 @@ public class AccountController : Controller
 
     public async Task<IActionResult> Logout()
     {
-        await HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
+        // Xóa session
         HttpContext.Session.Clear();
-        HttpContext.Session.Remove("UserRole");
+        
+        // Xóa authentication
+        await HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
+        
+        // Xóa tất cả cookies
+        foreach (var cookie in Request.Cookies.Keys)
+        {
+            Response.Cookies.Delete(cookie);
+        }
+
+        // Thêm headers chống cache
+        Response.Headers["Cache-Control"] = "no-cache, no-store, must-revalidate, private";
+        Response.Headers["Pragma"] = "no-cache";
+        Response.Headers["Expires"] = "-1";
+
         return RedirectToAction("Login", "Account");
     }
 }
