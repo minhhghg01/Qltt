@@ -1,0 +1,33 @@
+@{
+    ViewData["Title"] = "Login";
+}
+
+<div class="login-container mt-5">
+    <h2 class="text-center">Đăng nhập</h2>
+
+    <form method="post" asp-action="Login" class="mt-4">
+        <div class="mb-3">
+            <label for="email" class="form-label">Tài khoản:</label>
+            <input class="form-control" name="email" required
+                placeholder="Nhập tên đăng nhập" />
+        </div>
+        <div class="mb-3">
+            <label for="password" class="form-label">Mật khẩu:</label>
+            <input type="password" class="form-control" name="password" required placeholder="Nhập mật khẩu" />
+        </div>
+        <button type="submit" class="btn btn-primary w-100">Đăng nhập</button>
+    </form>
+
+    @if (!string.IsNullOrEmpty(ViewData["ErrorMessage"] as string))
+    {
+        <div class="alert alert-danger mt-3" role="alert">
+            @ViewData["ErrorMessage"]
+        </div>
+    }
+
+
+</div>
+
+<link href="https://maxcdn.bootstrapcdn.com/bootstrap/5.1.3/css/bootstrap.min.css" rel="stylesheet" />
+<link href="~/css/login.css" rel="stylesheet" /> <!-- Liên kết file CSS riêng cho login -->
+

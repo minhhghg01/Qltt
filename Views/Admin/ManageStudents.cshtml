@@ -1,0 +1,32 @@
+@* @model List<Student>
+
+<h2>Quản lý Học sinh</h2>
+
+<table class="table">
+    <thead>
+        <tr>
+            <th>ID</th>
+            <th>Họ tên</th>
+            <th>Email</th>
+            <th>Lớp</th>
+            <th>Thao tác</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var student in Model)
+        {
+            <tr>
+                <td>@student.Id</td>
+                <td>@student.FullName</td>
+                <td>@student.Email</td>
+                <td>@student.Class</td>
+                <td>
+                    <a asp-action="EditStudent" asp-route-id="@student.Id">Sửa</a> |
+                    <a asp-action="DeleteStudent" asp-route-id="@student.Id">Xóa</a>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>
+
+<a asp-action="AddStudent" class="btn btn-primary">Thêm Học sinh mới</a> *@

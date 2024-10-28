@@ -1,0 +1,44 @@
+@model IEnumerable<Qltt.Models.Teacher>
+
+<h2>Quản lý Giáo viên</h2>
+
+<table class="table">
+    <thead>
+        <tr>
+            <th>ID</th>
+            <th>Họ</th>
+            <th>Tên</th>
+            <th>Email</th>
+            <th>Thao tác</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var teacher in Model)
+        {
+            <tr>
+                <td>@teacher.Id</td>
+                <td>@teacher.FirstName</td>
+                <td>@teacher.LastName</td>
+                <td>@teacher.Email</td>
+                <td>
+                    <a asp-action="EditTeacher" asp-controller="Admin" asp-route-id="@teacher.Id">Sửa</a> |
+                    <a asp-action="DeleteTeacher" asp-controller="Admin" asp-route-id="@teacher.Id">Xóa</a>
+                </td>
+            </tr>
+        }
+    </tbody>
+    @* <tbody>
+        <tr>
+            <td>1</td>
+            <td>Nguyen</td>
+            <td>Van A</td>
+            <td>nguyenvana@gmail.com</td>
+            <td>
+                <a class="btn btn-primary" asp-action="EditTeacher" asp-route-id="1">Sửa</a> |
+                <a class="btn btn-danger" asp-action="DeleteTeacher" asp-route-id="1">Xóa</a>
+            </td>
+        </tr>
+    </tbody> *@
+</table>
+
+<a asp-action="AddTeacher" asp-controller="Admin" class="btn btn-primary">Thêm Giáo viên mới</a>

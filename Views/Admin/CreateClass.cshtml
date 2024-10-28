@@ -1,0 +1,27 @@
+@model Qltt.Models.Class
+
+@{
+    ViewData["Title"] = "Tạo lớp học mới";
+}
+
+<h2>@ViewData["Title"]</h2>
+
+<form asp-action="CreateClass" method="post">
+    <div class="form-group">
+        <label asp-for="ClassName">Tên lớp</label>
+        <input asp-for="ClassName" class="form-control" />
+        <span asp-validation-for="ClassName" class="text-danger"></span>
+        <label asp-for="TeacherId">Giáo viên</label>
+        <input asp-for="TeacherId" class="form-control" />
+        <span asp-validation-for="TeacherId" class="text-danger"></span>
+    </div>
+
+    <div class="mt-3">
+        <button type="submit" class="btn btn-primary">Tạo lớp</button>
+        <a asp-action="ManageClasses" class="btn btn-secondary">Quay lại</a>
+    </div>
+</form>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+}
