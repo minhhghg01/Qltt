@@ -4,7 +4,7 @@
   --- CRUD Teachers
   --- CRUD Students
 -Teacher
-  --- CRUD Students
+  --- Take attendance
 -Student
   --- Take the Test
   
