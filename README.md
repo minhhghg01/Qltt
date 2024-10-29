@@ -1,6 +1,5 @@
 -Admin
   --- CRUD Classes
-  --- CRUD Subjects
   --- CRUD Teachers
   --- CRUD Students
 -Teacher
