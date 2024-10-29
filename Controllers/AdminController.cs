@@ -104,27 +104,35 @@ namespace Qltt.Controllers
         }
 
         public async Task<IActionResult> DeleteTeacher(int id)
-    {
-        var teacher = await _context.Teachers.FirstOrDefaultAsync   (t => t.Id == id);
-        if (teacher == null)
         {
-            // return NotFound(); // Nếu không tìm thấy giáo viên
-        }
-            return View(teacher); // Truyền giáo viên vào View
+            var teacher = await _context.Teachers
+                .Include(t => t.User)
+                .FirstOrDefaultAsync(t => t.TeacherId == id);
+
+            if (teacher == null)
+            {
+                return NotFound();
+            }
+
+            return View(teacher);
         }
 
         [HttpPost, ActionName("DeleteTeacher")]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> DeleteConfirmed(int id)
-    {
-        var teacher = await _context.Teachers.FirstOrDefaultAsync(t => t.Id == id);
-        if (teacher != null)
+        public async Task<IActionResult> DeleteTeacherConfirmed(int id)
         {
-                _context.Teachers.Remove(teacher); // Xóa giáo viên khỏi DB
+            var teacher = await _context.Teachers
+                .Include(t => t.User)
+                .FirstOrDefaultAsync(t => t.TeacherId == id);
+
+            if (teacher == null)
+            {
+                return NotFound();
             }
-            await _context.SaveChangesAsync(); // Lưu thay đổi
-        
-            return RedirectToAction("ManageTeachers"); // Quay lại danh sách giáo viên
+
+            _context.Teachers.Remove(teacher);
+            await _context.SaveChangesAsync();
+            return RedirectToAction(nameof(ManageTeachers));
         }
 
         //------------------ Quản lý học sinh ------------------

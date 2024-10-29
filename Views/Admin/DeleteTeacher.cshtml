@@ -1,18 +1,19 @@
-@model Qltt.Models.Teacher
+@model Teacher
 
-@{
-    ViewData["Title"] = "Xóa giáo viên";
-}
+<h2>Xác nhận xóa giáo viên</h2>
+<div>
+    <h4>Bạn có chắc chắn muốn xóa giáo viên này?</h4>
+    <hr />
+    <dl class="row">
+        <dt class="col-sm-2">Họ và tên:</dt>
+        <dd class="col-sm-10">@Model.User.FirstName @Model.User.LastName</dd>
+        <dt class="col-sm-2">Email:</dt>
+        <dd class="col-sm-10">@Model.User.Email</dd>
+    </dl>
 
-<div class="container mt-4">
-    <h2 class="text-center text-danger">Bạn có chắc chắn muốn xóa giáo viên này?</h2>
-    <div class="card p-4">
-        <p><strong>Tên giáo viên:</strong> @Model.LastName</p>
-        <p><strong>Email:</strong> @Model.Email</p>
-
-        <form method="post" asp-action="DeleteConfirmed" asp-route-id="@Model.Id">
-            <button type="submit" class="btn btn-danger">Xóa</button>
-            <a href="@Url.Action("ManageTeachers", "Admin")" class="btn btn-secondary">Hủy</a>
-        </form>
-    </div>
+    <form asp-action="DeleteTeacher">
+        <input type="hidden" asp-for="TeacherId" />
+        <input type="submit" value="Xóa" class="btn btn-danger" />
+        <a asp-action="ManageTeachers" class="btn btn-secondary">Quay lại</a>
+    </form>
 </div>

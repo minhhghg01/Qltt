@@ -1,11 +1,14 @@
 using System;
 using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace Qltt.Models
 {
     public class User
     {
-        public int Id { get; set; }
+        [Key]
+        [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
+        public int UserId { get; set; }
 
         [Required]
         [StringLength(100)]
@@ -22,6 +25,7 @@ namespace Qltt.Models
         [Required]
         public string Password { get; set; }
 
+        [Required]
         public string Role { get; set; }
 
         public DateTime CreatedAt { get; set; } = DateTime.Now;

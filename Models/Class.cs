@@ -5,17 +5,17 @@ namespace Qltt.Models
 {
     public class Class
     {
-        // public int Id { get; set; }
+        public int ClassId { get; set; }
 
         [Required(ErrorMessage = "Tên lớp là bắt buộc.")]
         public required string ClassName { get; set; }
 
-        public int ClassId { get; set; }
-        // public Course Course { get; set; }
-
         public int TeacherId { get; set; }
-        // public Teacher Teacher { get; set; }
 
-        // public List<Student> Students { get; set; }
+        // Navigation properties
+        public Teacher Teacher { get; set; }
+        public ICollection<Student> Students { get; set; }
+        public ICollection<Test> Tests { get; set; }
+        public ICollection<Attendance> Attendances { get; set; }
     }
 }

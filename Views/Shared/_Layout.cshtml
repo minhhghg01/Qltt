@@ -1,4 +1,5 @@
-﻿<link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+﻿@using System.Security.Claims
+<link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
 <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
 
 
@@ -58,7 +59,7 @@
     @if (!ViewData["Title"]?.ToString()?.Contains("Login") ?? true)
     {
         <div class="sidebar">
-            <h4>Trang quản lý </h4>
+            <h4>Tác vụ của @User.FindFirst(ClaimTypes.Role)?.Value</h4>
             @if (User.IsInRole("Admin"))
             {
             <a href="@Url.Action("ManageClasses", "Admin")">

@@ -2,6 +2,10 @@ namespace Qltt.Models
 {
     public class Admin : User
     {
-        // Thêm các thuộc tính đặc biệt cho Admin nếu cần
+        public int AdminId { get; set; }
+        public int UserId { get; set; }
+
+        // Navigation property
+        public virtual User User { get; set; }
     }
 }
