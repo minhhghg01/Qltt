@@ -6,18 +6,23 @@ namespace Qltt.Models
 {
     public class Class
     {
+        public Class()
+        {
+            Students = new HashSet<Student>();
+            Attendances = new HashSet<Attendance>();
+        }
+
         public int ClassId { get; set; }
 
-        [Required(ErrorMessage = "Tên lớp là bắt buộc.")]
-        public required string ClassName { get; set; }
+        [Required(ErrorMessage = "Tên lớp là bắt buộc")]
+        public string ClassName { get; set; }
 
-        public int TeacherId { get; set; }
+        public int? TeacherId { get; set; }
 
-        // Navigation properties
         [ForeignKey("TeacherId")]
-        public Teacher Teacher { get; set; }
-        public ICollection<Student> Students { get; set; }
-        public ICollection<Test> Tests { get; set; }
-        public ICollection<Attendance> Attendances { get; set; }
+        public virtual Teacher Teacher { get; set; }
+
+        public virtual ICollection<Student> Students { get; set; }
+        public virtual ICollection<Attendance> Attendances { get; set; }
     }
 }

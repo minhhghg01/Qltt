@@ -12,8 +12,7 @@ namespace Qltt.Models
         [ForeignKey("UserId")]
         public virtual User User { get; set; }
 
-        public int? ClassId { get; set; }
-        [ForeignKey("ClassId")]
+        // Navigation property to Class
         public virtual Class Class { get; set; }
     }
 }

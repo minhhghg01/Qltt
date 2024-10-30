@@ -59,8 +59,7 @@ namespace Qltt.Data
             modelBuilder.Entity<Class>()
                 .HasOne(c => c.Teacher)
                 .WithOne(t => t.Class)
-                .HasForeignKey<Class>(c => c.TeacherId)
-                .OnDelete(DeleteBehavior.Restrict);
+                .HasForeignKey<Class>(c => c.TeacherId);
 
             // Cấu hình quan hệ Student - StudentTest
             modelBuilder.Entity<StudentTest>(entity =>

@@ -71,7 +71,7 @@ namespace Qltt.Migrations
                     ClassId = table.Column<int>(type: "int", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
                     ClassName = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: false),
-                    TeacherId = table.Column<int>(type: "int", nullable: false)
+                    TeacherId = table.Column<int>(type: "int", nullable: true)
                 },
                 constraints: table =>
                 {
@@ -87,14 +87,13 @@ namespace Qltt.Migrations
                 name: "Students",
                 columns: table => new
                 {
-                    StudentId = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
                     UserId = table.Column<int>(type: "int", nullable: false),
+                    StudentId = table.Column<int>(type: "int", nullable: false),
                     ClassId = table.Column<int>(type: "int", nullable: false)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_Students", x => x.StudentId);
+                    table.PrimaryKey("PK_Students", x => x.UserId);
                     table.ForeignKey(
                         name: "FK_Students_Classes_ClassId",
                         column: x => x.ClassId,
@@ -152,7 +151,7 @@ namespace Qltt.Migrations
                         name: "FK_Attendances_Students_StudentId",
                         column: x => x.StudentId,
                         principalTable: "Students",
-                        principalColumn: "StudentId");
+                        principalColumn: "UserId");
                 });
 
             migrationBuilder.CreateTable(
@@ -172,7 +171,7 @@ namespace Qltt.Migrations
                         name: "FK_StudentTests_Students_StudentId",
                         column: x => x.StudentId,
                         principalTable: "Students",
-                        principalColumn: "StudentId");
+                        principalColumn: "UserId");
                     table.ForeignKey(
                         name: "FK_StudentTests_Tests_TestId",
                         column: x => x.TestId,
@@ -195,17 +194,13 @@ namespace Qltt.Migrations
                 name: "IX_Classes_TeacherId",
                 table: "Classes",
                 column: "TeacherId",
-                unique: true);
+                unique: true,
+                filter: "[TeacherId] IS NOT NULL");
 
             migrationBuilder.CreateIndex(
                 name: "IX_Students_ClassId",
                 table: "Students",
                 column: "ClassId");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_Students_UserId",
-                table: "Students",
-                column: "UserId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_StudentTests_StudentId",

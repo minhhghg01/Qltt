@@ -12,7 +12,9 @@
         <input asp-for="ClassName" class="form-control" />
         <span asp-validation-for="ClassName" class="text-danger"></span>
         <label asp-for="TeacherId">Giáo viên</label>
-        <input asp-for="TeacherId" class="form-control" />
+        <select asp-for="TeacherId" asp-items="ViewBag.Teachers" class="form-control">
+            <option value="">-- Chọn giáo viên --</option>
+        </select>
         <span asp-validation-for="TeacherId" class="text-danger"></span>
     </div>
 

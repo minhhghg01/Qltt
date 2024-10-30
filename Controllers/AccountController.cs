@@ -37,61 +37,45 @@ namespace Qltt.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Login(string email, string password)
         {
-            try 
+            // Thêm log để debug
+            Console.WriteLine($"Login attempt - Email: {email}");
+
+            if (string.IsNullOrEmpty(email) || string.IsNullOrEmpty(password))
             {
-                if (string.IsNullOrEmpty(email) || string.IsNullOrEmpty(password))
-                {
-                    ModelState.AddModelError(string.Empty, "Vui lòng nhập email và mật khẩu");
-                    return View();
-                }
-
-                // Tìm user trong bảng Users
-                var user = await _context.Users
-                    .FirstOrDefaultAsync(u => u.Email == email && u.Password == password);
-
-                if (user != null)
-                {
-                    switch (user.Role.ToLower())
-                    {
-                        case "admin":
-                            return await SignInUser(user.Email, "Admin", user.FirstName, "/Admin/Index");
-                        case "teacher":
-                            return await SignInUser(user.Email, "Teacher", user.FirstName, "/Teacher/Index");
-                        default:
-                            ModelState.AddModelError(string.Empty, "Vai trò người dùng không hợp lệ");
-                            return View();
-                    }
-                }
-
-                ModelState.AddModelError(string.Empty, "Email hoặc mật khẩu không chính xác");
+                TempData["Error"] = "Vui lòng nhập email và mật khẩu";
                 return View();
             }
-            catch (Exception ex)
+
+            var user = await _context.Users.FirstOrDefaultAsync(u => u.Email == email);
+
+            if (user != null && user.Password == password)
             {
-                System.Diagnostics.Debug.WriteLine($"Login error: {ex.Message}");
-                ModelState.AddModelError(string.Empty, "Có lỗi xảy ra trong quá trình đăng nhập");
-                return View();
+                var claims = new List<Claim>
+                {
+                    new Claim(ClaimTypes.Name, user.Email),
+                    new Claim(ClaimTypes.Role, user.Role),
+                    new Claim("FullName", $"{user.FirstName} {user.LastName}")
+                };
+
+                var claimsIdentity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
+                var authProperties = new AuthenticationProperties
+                {
+                    IsPersistent = true,
+                    ExpiresUtc = DateTimeOffset.UtcNow.AddHours(1)
+                };
+
+                await HttpContext.SignInAsync(
+                    CookieAuthenticationDefaults.AuthenticationScheme,
+                    new ClaimsPrincipal(claimsIdentity),
+                    authProperties);
+
+                HttpContext.Session.SetString("UserRole", user.Role);
+
+                return RedirectToAction("Index", "Home");
             }
-        }
 
-        private async Task<IActionResult> SignInUser(string email, string role, string firstName, string redirectUrl)
-        {
-            var claims = new List<Claim>
-            {
-                new Claim(ClaimTypes.Email, email),
-                new Claim(ClaimTypes.Role, role),
-                new Claim(ClaimTypes.Name, firstName)
-            };
-
-            var claimsIdentity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
-
-            await HttpContext.SignInAsync(
-                CookieAuthenticationDefaults.AuthenticationScheme,
-                new ClaimsPrincipal(claimsIdentity));
-
-            HttpContext.Session.SetString("UserRole", role);
-
-            return Redirect(redirectUrl);
+            TempData["Error"] = "Email hoặc mật khẩu không chính xác";
+            return View();
         }
 
         public async Task<IActionResult> Logout()
