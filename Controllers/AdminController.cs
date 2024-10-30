@@ -2,6 +2,8 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Authorization;
 using Qltt.Data;
 using Microsoft.EntityFrameworkCore;
+using X.PagedList;
+using X.PagedList.Extensions;
 
 namespace Qltt.Controllers
 {
@@ -143,12 +145,13 @@ namespace Qltt.Controllers
         }
 
         //------------------ Quản lý học sinh ------------------
-        public async Task<IActionResult> ManageStudents() { 
+        public async Task<IActionResult> ManageStudents(int page = 1, int pageSize = 10) { 
             var students = await _context.Students
         .Include(s => s.Class)
                 .Include(s => s.User)
                 .ToListAsync();
-            return View(students);
+            var pagedStudents = students.ToPagedList(page, pageSize);
+            return View(pagedStudents);
         }
 
     }

@@ -61,6 +61,12 @@ namespace Qltt.Data
                 .WithOne(t => t.Class)
                 .HasForeignKey<Class>(c => c.TeacherId);
 
+            // Cấu hình quan hệ Class - Teacher
+            modelBuilder.Entity<Teacher>()
+                .HasOne(t => t.Class)
+                .WithOne(c => c.Teacher)
+                .HasForeignKey<Teacher>(t => t.TeacherId);
+
             // Cấu hình quan hệ Student - StudentTest
             modelBuilder.Entity<StudentTest>(entity =>
             {
