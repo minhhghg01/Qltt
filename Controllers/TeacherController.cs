@@ -3,7 +3,7 @@ using Microsoft.AspNetCore.Authorization;
 
 namespace Qltt.Controllers
 {
-    // [Authorize(Roles = "Teacher")]
+    [Authorize(Roles = "Teacher")]
     public class TeacherController : Controller
     {
         public IActionResult Index() { return View(); }

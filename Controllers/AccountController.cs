@@ -81,23 +81,15 @@ namespace Qltt.Controllers
 
         public async Task<IActionResult> Logout()
         {
-            // Xóa session
-            HttpContext.Session.Clear();
-            
-            // Xóa authentication
+            // Đăng xuất
             await HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
             
-            // Xóa tất cả cookies
-            foreach (var cookie in Request.Cookies.Keys)
-            {
-                Response.Cookies.Delete(cookie);
-            }
-
-            // Thêm headers chống cache
-            Response.Headers["Cache-Control"] = "no-cache, no-store, must-revalidate, private";
+            // Xóa cache
+            Response.Headers["Cache-Control"] = "no-cache, no-store, must-revalidate";
             Response.Headers["Pragma"] = "no-cache";
-            Response.Headers["Expires"] = "-1";
+            Response.Headers["Expires"] = "0";
 
+            // Chuyển hướng về trang login
             return RedirectToAction("Login", "Account");
         }
     }

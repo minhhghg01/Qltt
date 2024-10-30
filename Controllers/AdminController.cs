@@ -5,7 +5,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Qltt.Controllers
 {
-    [Authorize]
+    [Authorize(Roles = "Admin")]
     public class AdminController : Controller
     {
         private readonly ApplicationDbContext _context;
