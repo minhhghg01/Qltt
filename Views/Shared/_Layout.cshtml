@@ -71,28 +71,25 @@
             <a href="@Url.Action("ManageTeachers", "Admin")">
                 <i class="bi bi-person-badge-fill"></i> Giảng viên
             </a>
-            <a href="@Url.Action("Logout", "Account")">
-                <i class="bi bi-box-arrow-right"></i> Đăng xuất
-            </a>
+            
             }
             else if (User.IsInRole("Teacher"))
             {
                 <a href="@Url.Action("Index", "Teacher")">
                     <i class="bi bi-house-door-fill"></i> Lớp học
                 </a>
-                <a href="@Url.Action("Logout", "Account")">
-                    <i class="bi bi-box-arrow-right"></i> Đăng xuất
-                </a>
+                
             }
             else if (User.IsInRole("Student"))
             {
                 <a href="@Url.Action("Index", "Student")">
                     <i class="bi bi-house-door-fill"></i> Làm bài kiểm tra
                 </a>
-                <a href="@Url.Action("Logout", "Account")">
-                    <i class="bi bi-box-arrow-right"></i> Đăng xuất
-                </a>
+                
             }
+            <a href="@Url.Action("Logout", "Account")">
+                <i class="bi bi-box-arrow-right"></i> Đăng xuất
+            </a>
         </div>
     }
 

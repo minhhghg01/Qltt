@@ -49,7 +49,11 @@ namespace Qltt.Controllers
 
         public async Task<IActionResult> DetailsClass(int id)
         {
-            var classDetail = await _context.Classes.FirstOrDefaultAsync(c => c.ClassId == id);
+            var classDetail = await _context.Classes
+            .Include(c => c.Students)
+            .Include(c => c.Teacher)
+            .ThenInclude(t => t.User)
+            .FirstOrDefaultAsync(c => c.ClassId == id);
             if (classDetail == null)
             {
                 return NotFound();

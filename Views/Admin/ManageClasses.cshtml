@@ -19,13 +19,8 @@
                     <td>@cls.ClassName</td>
                     <td class="text-center">
                         <a class="btn btn-primary" asp-action="DetailsClass" asp-controller="Admin" asp-route-id="@cls.ClassId">Xem</a>
-                        <a class="btn btn-link dropdown-toggle" type="button" data-bs-toggle="dropdown">
-                            Thêm
-                        </a>
-                        <ul class="dropdown-menu">
-                            <li><a class="dropdown-item" asp-action="CreateSubject" asp-controller="Subject">Thêm môn học</a></li>
-                            <li><a class="dropdown-item" asp-action="CreateStudent" asp-controller="Student">Thêm học viên</a></li>
-                        </ul>
+                        
+                        
                         <a class="btn btn-danger" asp-action="DeleteClass" asp-controller="Admin" asp-route-id="@cls.ClassId">
                             <i class="bi bi-trash">Xóa</i>
                         </a>

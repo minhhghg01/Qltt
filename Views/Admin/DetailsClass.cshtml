@@ -7,8 +7,35 @@
     <h2 class="text-center">Thông tin lớp học</h2>
     <div class="card p-4">
         <p><strong>Tên lớp:</strong> @Model.ClassName</p>
-        <p><strong>Số môn học:</strong> 5 </p>
-        <p><strong>Số học viên:</strong> 5 </p>
+        <p><strong>Giáo viên:</strong> @Model.Teacher.User.FirstName @Model.Teacher.User.LastName</p>
+        <p><strong>Số học viên:</strong> @Model.Students.Count </p>
+    </div>
+    <!-- Danh sách học viên Table-->
+    <div class="card p-4">
+        <h3>Danh sách học viên</h3>
+        <table class="table table-bordered">
+            <thead>
+                <tr>
+                    
+                    <th>Họ</th>
+                    <th>Tên</th>
+                    <th>Thao tác</th>
+                </tr>
+            </thead>
+            <tbody>
+            @foreach (var student in Model.Students)
+            {
+                <tr>
+                   
+                    <td>@student.User.FirstName</td>
+                    <td>@student.User.LastName</td>
+                    <td>
+                        <a class="btn btn-danger" asp-action="DeleteStudent" asp-route-id="@student.StudentId"><i class="bi bi-trash"> Xóa </i></a>
+                    </td>
+                </tr>
+            }
+            </tbody>
+        </table>
     </div>
 </div>
 
