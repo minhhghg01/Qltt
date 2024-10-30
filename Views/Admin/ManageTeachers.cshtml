@@ -6,7 +6,9 @@
     <thead>
         <tr>
             <th>ID</th>
-            <th>Họ và tên</th>
+            <th>Họ</th>
+            <th>Tên</th>
+            <th>Lớp</th>
             <th>Email</th>
             <th>Thao tác</th>
         </tr>
@@ -16,7 +18,9 @@
         {
             <tr>
                 <td>@teacher.TeacherId</td>
-                <td>@teacher.User.FirstName @teacher.User.LastName</td>
+                <td>@teacher.User.FirstName</td>
+                <td>@teacher.User.LastName</td>
+                <td>@teacher.Class?.ClassName</td>
                 <td>@teacher.User.Email</td>
                 <td>
                     <a asp-action="EditTeacher" asp-route-id="@teacher.TeacherId">Sửa</a> |

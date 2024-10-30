@@ -85,9 +85,12 @@ namespace Qltt.Controllers
 
         //------------------ Quản lý giáo viên ------------------
         public async Task<IActionResult> ManageTeachers() {
-            var teachers = await _context.Teachers.ToListAsync(); // Đảm bảo dữ liệu không null
+            var teachers = await _context.Teachers
+            .Include(t => t.Class)
+            .Include(t => t.User)
+            .ToListAsync(); // Đảm bảo dữ liệu không null
             return View(teachers);
-         }
+        }
 
         public IActionResult AddTeacher() { return View(); }
 
@@ -136,11 +139,13 @@ namespace Qltt.Controllers
         }
 
         //------------------ Quản lý học sinh ------------------
-        public IActionResult ManageStudents() { return View(); }
+        public async Task<IActionResult> ManageStudents() { 
+            var students = await _context.Students
+        .Include(s => s.Class)
+                .Include(s => s.User)
+                .ToListAsync();
+            return View(students);
+        }
 
-        //------------------ Quản lý môn học ------------------
-        public IActionResult ManageSubjects() { return View(); }
-
-        // Thêm các action methods khác nếu cần
     }
 }
