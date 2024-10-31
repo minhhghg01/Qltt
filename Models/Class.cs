@@ -14,7 +14,7 @@ namespace Qltt.Models
 
         public int ClassId { get; set; }
 
-        [Required(ErrorMessage = "Tên lớp là bắt buộc")]
+        [Required]
         public string ClassName { get; set; }
 
         public int? TeacherId { get; set; }

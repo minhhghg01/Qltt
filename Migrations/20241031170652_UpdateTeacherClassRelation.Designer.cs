@@ -12,8 +12,8 @@ using Qltt.Data;
 namespace Qltt.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20241030075807_InitialCreate")]
-    partial class InitialCreate
+    [Migration("20241031170652_UpdateTeacherClassRelation")]
+    partial class UpdateTeacherClassRelation
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -78,9 +78,7 @@ namespace Qltt.Migrations
 
                     b.HasKey("ClassId");
 
-                    b.HasIndex("TeacherId")
-                        .IsUnique()
-                        .HasFilter("[TeacherId] IS NOT NULL");
+                    b.HasIndex("TeacherId");
 
                     b.ToTable("Classes");
                 });
@@ -109,6 +107,25 @@ namespace Qltt.Migrations
                     b.HasIndex("TestId");
 
                     b.ToTable("StudentTests");
+                });
+
+            modelBuilder.Entity("Qltt.Models.Teacher", b =>
+                {
+                    b.Property<int>("TeacherId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("TeacherId"));
+
+                    b.Property<int>("UserId")
+                        .HasColumnType("int");
+
+                    b.HasKey("TeacherId");
+
+                    b.HasIndex("UserId")
+                        .IsUnique();
+
+                    b.ToTable("Teachers", (string)null);
                 });
 
             modelBuilder.Entity("Qltt.Models.Test", b =>
@@ -207,16 +224,6 @@ namespace Qltt.Migrations
                     b.ToTable("Students");
                 });
 
-            modelBuilder.Entity("Qltt.Models.Teacher", b =>
-                {
-                    b.HasBaseType("Qltt.Models.User");
-
-                    b.Property<int>("TeacherId")
-                        .HasColumnType("int");
-
-                    b.ToTable("Teachers", (string)null);
-                });
-
             modelBuilder.Entity("Qltt.Models.Attendance", b =>
                 {
                     b.HasOne("Qltt.Models.Class", "Class")
@@ -239,8 +246,8 @@ namespace Qltt.Migrations
             modelBuilder.Entity("Qltt.Models.Class", b =>
                 {
                     b.HasOne("Qltt.Models.Teacher", "Teacher")
-                        .WithOne("Class")
-                        .HasForeignKey("Qltt.Models.Class", "TeacherId")
+                        .WithMany("Classes")
+                        .HasForeignKey("TeacherId")
                         .OnDelete(DeleteBehavior.NoAction);
 
                     b.Navigation("Teacher");
@@ -263,6 +270,17 @@ namespace Qltt.Migrations
                     b.Navigation("Student");
 
                     b.Navigation("Test");
+                });
+
+            modelBuilder.Entity("Qltt.Models.Teacher", b =>
+                {
+                    b.HasOne("Qltt.Models.User", "User")
+                        .WithOne("Teacher")
+                        .HasForeignKey("Qltt.Models.Teacher", "UserId")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .IsRequired();
+
+                    b.Navigation("User");
                 });
 
             modelBuilder.Entity("Qltt.Models.Test", b =>
@@ -292,7 +310,7 @@ namespace Qltt.Migrations
                     b.HasOne("Qltt.Models.Class", "Class")
                         .WithMany("Students")
                         .HasForeignKey("ClassId")
-                        .OnDelete(DeleteBehavior.Restrict)
+                        .OnDelete(DeleteBehavior.NoAction)
                         .IsRequired();
 
                     b.HasOne("Qltt.Models.User", "User")
@@ -306,17 +324,6 @@ namespace Qltt.Migrations
                     b.Navigation("User");
                 });
 
-            modelBuilder.Entity("Qltt.Models.Teacher", b =>
-                {
-                    b.HasOne("Qltt.Models.User", "User")
-                        .WithOne()
-                        .HasForeignKey("Qltt.Models.Teacher", "UserId")
-                        .OnDelete(DeleteBehavior.NoAction)
-                        .IsRequired();
-
-                    b.Navigation("User");
-                });
-
             modelBuilder.Entity("Qltt.Models.Class", b =>
                 {
                     b.Navigation("Attendances");
@@ -324,9 +331,20 @@ namespace Qltt.Migrations
                     b.Navigation("Students");
                 });
 
+            modelBuilder.Entity("Qltt.Models.Teacher", b =>
+                {
+                    b.Navigation("Classes");
+                });
+
             modelBuilder.Entity("Qltt.Models.Test", b =>
                 {
                     b.Navigation("StudentTests");
+                });
+
+            modelBuilder.Entity("Qltt.Models.User", b =>
+                {
+                    b.Navigation("Teacher")
+                        .IsRequired();
                 });
 
             modelBuilder.Entity("Qltt.Models.Student", b =>
@@ -334,12 +352,6 @@ namespace Qltt.Migrations
                     b.Navigation("Attendances");
 
                     b.Navigation("StudentTests");
-                });
-
-            modelBuilder.Entity("Qltt.Models.Teacher", b =>
-                {
-                    b.Navigation("Class")
-                        .IsRequired();
                 });
 #pragma warning restore 612, 618
         }

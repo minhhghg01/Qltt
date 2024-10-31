@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace Qltt.Migrations
 {
     /// <inheritdoc />
-    public partial class InitialCreate : Migration
+    public partial class UpdateTeacherClassRelation : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -51,12 +51,13 @@ namespace Qltt.Migrations
                 name: "Teachers",
                 columns: table => new
                 {
-                    UserId = table.Column<int>(type: "int", nullable: false),
                     TeacherId = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    UserId = table.Column<int>(type: "int", nullable: false)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_Teachers", x => x.UserId);
+                    table.PrimaryKey("PK_Teachers", x => x.TeacherId);
                     table.ForeignKey(
                         name: "FK_Teachers_Users_UserId",
                         column: x => x.UserId,
@@ -80,7 +81,7 @@ namespace Qltt.Migrations
                         name: "FK_Classes_Teachers_TeacherId",
                         column: x => x.TeacherId,
                         principalTable: "Teachers",
-                        principalColumn: "UserId");
+                        principalColumn: "TeacherId");
                 });
 
             migrationBuilder.CreateTable(
@@ -98,8 +99,7 @@ namespace Qltt.Migrations
                         name: "FK_Students_Classes_ClassId",
                         column: x => x.ClassId,
                         principalTable: "Classes",
-                        principalColumn: "ClassId",
-                        onDelete: ReferentialAction.Restrict);
+                        principalColumn: "ClassId");
                     table.ForeignKey(
                         name: "FK_Students_Users_UserId",
                         column: x => x.UserId,
@@ -193,9 +193,7 @@ namespace Qltt.Migrations
             migrationBuilder.CreateIndex(
                 name: "IX_Classes_TeacherId",
                 table: "Classes",
-                column: "TeacherId",
-                unique: true,
-                filter: "[TeacherId] IS NOT NULL");
+                column: "TeacherId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_Students_ClassId",
@@ -211,6 +209,12 @@ namespace Qltt.Migrations
                 name: "IX_StudentTests_TestId",
                 table: "StudentTests",
                 column: "TestId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Teachers_UserId",
+                table: "Teachers",
+                column: "UserId",
+                unique: true);
 
             migrationBuilder.CreateIndex(
                 name: "IX_Tests_ClassId",

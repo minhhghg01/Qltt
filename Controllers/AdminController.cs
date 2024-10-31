@@ -90,9 +90,10 @@ namespace Qltt.Controllers
         }
 
         //------------------ Quản lý giáo viên ------------------
-        public async Task<IActionResult> ManageTeachers() {
+        public async Task<IActionResult> ManageTeachers()
+        {
             var teachers = await _context.Teachers
-            .Include(t => t.Class)
+            .Include(t => t.Classes)
             .Include(t => t.User)
             .ToListAsync(); // Đảm bảo dữ liệu không null
             return View(teachers);
@@ -102,14 +103,48 @@ namespace Qltt.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> AddTeacher([Bind("FirstName,LastName,Email,ClassId,Password")] Models.Teacher teacher) { 
-            if (ModelState.IsValid)
+        public async Task<IActionResult> AddTeacher(
+            string email,
+            string firstName,
+            string lastName,
+            string password,
+            string className
+        )
+        {
+                    // Tạo User mới
+            var user = new Models.User
             {
-                _context.Teachers.Add(teacher);
-                await _context.SaveChangesAsync();
-                return RedirectToAction(nameof(ManageTeachers));
-            }
-            return View(teacher);
+                Email = email,
+                FirstName = firstName,
+                LastName = lastName,
+                Password = password,
+                Role = "Teacher",
+            };
+
+            // Thêm User vào cơ sở dữ liệu
+            _context.Users.Add(user);
+            await _context.SaveChangesAsync();
+
+            // Tạo Teacher mới với UserId của User
+            var newTeacher = new Models.Teacher
+            {
+                UserId = user.UserId,
+            };
+
+            _context.Teachers.Add(newTeacher);
+            await _context.SaveChangesAsync();
+
+            // Tạo một Class mới mà không cần TeacherId
+            var newClass = new Models.Class
+            {
+                ClassName = className,
+                TeacherId = newTeacher.TeacherId,
+            };
+
+            _context.Classes.Add(newClass);
+            await _context.SaveChangesAsync();
+
+            return RedirectToAction(nameof(ManageTeachers));
         }
 
         public async Task<IActionResult> DeleteTeacher(int id)
@@ -145,7 +180,8 @@ namespace Qltt.Controllers
         }
 
         //------------------ Quản lý học sinh ------------------
-        public async Task<IActionResult> ManageStudents(int page = 1, int pageSize = 10) { 
+        public async Task<IActionResult> ManageStudents(int page = 1, int pageSize = 10)
+        {
             var students = await _context.Students
         .Include(s => s.Class)
                 .Include(s => s.User)

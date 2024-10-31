@@ -20,7 +20,7 @@
                 <td>@teacher.TeacherId</td>
                 <td>@teacher.User.FirstName</td>
                 <td>@teacher.User.LastName</td>
-                <td>@teacher.Class?.ClassName</td>
+                <td>@teacher.Classes.FirstOrDefault()?.ClassName</td>
                 <td>@teacher.User.Email</td>
                 <td>
                     <a asp-action="EditTeacher" asp-route-id="@teacher.TeacherId">Sửa</a> |

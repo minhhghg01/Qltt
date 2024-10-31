@@ -30,5 +30,8 @@ namespace Qltt.Models
 
         public DateTime CreatedAt { get; set; } = DateTime.Now;
         public DateTime UpdatedAt { get; set; } = DateTime.Now;
+
+        // Navigation property
+        public virtual Teacher Teacher { get; set; }
     }
 }

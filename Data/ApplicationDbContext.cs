@@ -27,11 +27,11 @@ namespace Qltt.Data
             {
                 entity.HasKey(e => e.UserId);
                 entity.ToTable("Users");
-                
+
                 entity.Property(e => e.Email)
                     .IsRequired()
                     .HasMaxLength(100);
-                    
+
                 entity.Property(e => e.Password)
                     .IsRequired()
                     .HasMaxLength(100);
@@ -50,69 +50,50 @@ namespace Qltt.Data
             {
                 entity.ToTable("Teachers");
                 entity.HasOne(d => d.User)
-                    .WithOne()
-                    .HasForeignKey<Teacher>(d => d.UserId)
+                    .WithOne(u => u.Teacher)
+                    .HasForeignKey<Teacher>(t => t.UserId)
                     .OnDelete(DeleteBehavior.NoAction);
             });
 
-            // Cấu hình quan hệ Teacher - Class
-            modelBuilder.Entity<Class>()
-                .HasOne(c => c.Teacher)
-                .WithOne(t => t.Class)
-                .HasForeignKey<Class>(c => c.TeacherId);
+            // Cấu hình quan hệ một-một giữa Teacher và Class với TeacherId là khóa ngoại trong bảng Classes
+           modelBuilder.Entity<Class>()
+            .HasOne(c => c.Teacher)
+            .WithMany(t => t.Classes)
+            .HasForeignKey(c => c.TeacherId)
+            .OnDelete(DeleteBehavior.SetNull);
 
-            // Cấu hình quan hệ Class - Teacher
-            modelBuilder.Entity<Teacher>()
-                .HasOne(t => t.Class)
-                .WithOne(c => c.Teacher)
-                .HasForeignKey<Teacher>(t => t.TeacherId);
-
-            // Cấu hình quan hệ Student - StudentTest
+            // Cấu hình các quan hệ khác
             modelBuilder.Entity<StudentTest>(entity =>
             {
-                // Khóa chính
                 entity.HasKey(e => e.StudentTestId);
-
-                // Quan hệ với Student
                 entity.HasOne(st => st.Student)
                     .WithMany(s => s.StudentTests)
                     .HasForeignKey(st => st.StudentId)
                     .OnDelete(DeleteBehavior.Restrict);
-
-                // Quan hệ với Test
                 entity.HasOne(st => st.Test)
                     .WithMany(t => t.StudentTests)
                     .HasForeignKey(st => st.TestId)
                     .OnDelete(DeleteBehavior.Restrict);
-
-                // Cấu hình Score
                 entity.Property(e => e.Score)
                     .HasColumnType("decimal(5,2)")
                     .IsRequired();
             });
 
-            // Cấu hình quan hệ Test - StudentTest
-            modelBuilder.Entity<StudentTest>()
-                .HasOne(st => st.Test)
-                .WithMany(t => t.StudentTests)
-                .HasForeignKey(st => st.TestId)
-                .OnDelete(DeleteBehavior.Restrict);
+            modelBuilder.Entity<Attendance>(entity =>
+            {
+                entity.HasOne(a => a.Student)
+                    .WithMany(s => s.Attendances)
+                    .HasForeignKey(a => a.StudentId)
+                    .OnDelete(DeleteBehavior.Restrict);
+                entity.HasOne(a => a.Class)
+                    .WithMany(c => c.Attendances)
+                    .HasForeignKey(a => a.ClassId)
+                    .OnDelete(DeleteBehavior.Restrict);
+                entity.Property(e => e.Remarks).HasMaxLength(255);
+                entity.HasIndex(e => new { e.StudentId, e.ClassId, e.Date }).IsUnique();
+            });
 
-            // Cấu hình quan hệ Student - Attendance
-            modelBuilder.Entity<Attendance>()
-                .HasOne(a => a.Student)
-                .WithMany(s => s.Attendances)
-                .HasForeignKey(a => a.StudentId)
-                .OnDelete(DeleteBehavior.Restrict);
-
-            // Cấu hình quan hệ Class - Attendance
-            modelBuilder.Entity<Attendance>()
-                .HasOne(a => a.Class)
-                .WithMany(c => c.Attendances)
-                .HasForeignKey(a => a.ClassId)
-                .OnDelete(DeleteBehavior.Restrict);
-
-            // Các cấu hình khác
+            // Cấu hình thêm cho User, Class, Test
             modelBuilder.Entity<User>(entity =>
             {
                 entity.Property(e => e.FirstName).HasMaxLength(50).IsRequired();
@@ -132,16 +113,11 @@ namespace Qltt.Data
                 entity.Property(e => e.Date).IsRequired();
             });
 
-            modelBuilder.Entity<StudentTest>(entity =>
-            {
-                entity.Property(e => e.Score).HasColumnType("decimal(5,2)");
-            });
-
-            modelBuilder.Entity<Attendance>(entity =>
-            {
-                entity.Property(e => e.Remarks).HasMaxLength(255);
-                entity.HasIndex(e => new { e.StudentId, e.ClassId, e.Date }).IsUnique();
-            });
+            modelBuilder.Entity<Student>()
+                .HasOne(s => s.Class)
+                .WithMany(c => c.Students)
+                .HasForeignKey(s => s.ClassId)
+                .OnDelete(DeleteBehavior.Restrict);
 
             // Vô hiệu hóa cascade delete mặc định
             foreach (var relationship in modelBuilder.Model.GetEntityTypes()
@@ -149,13 +125,6 @@ namespace Qltt.Data
             {
                 relationship.DeleteBehavior = DeleteBehavior.NoAction;
             }
-
-            modelBuilder.Entity<Student>()
-                .HasOne(s => s.Class)
-                .WithMany(c => c.Students)
-                .HasForeignKey(s => s.ClassId)
-                .OnDelete(DeleteBehavior.Restrict);
         }
     }
-
 }
