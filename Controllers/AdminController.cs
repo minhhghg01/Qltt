@@ -104,6 +104,34 @@ namespace Qltt.Controllers
             return RedirectToAction(nameof(ManageClasses));
         }
 
+        // Get Edit Class
+        public async Task<IActionResult> EditClass(int id)
+        {
+            var classEdit = await _context.Classes.FindAsync(id);
+            return View(classEdit);
+        }
+
+        // Post Edit Class
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> EditClass(int id, string className)
+        {
+            var classEdit = await _context.Classes
+            .Include(c => c.Teacher)
+            .FirstOrDefaultAsync(c => c.ClassId == id);
+
+            if (classEdit == null)
+            {
+                return NotFound();
+            }
+
+            classEdit.ClassName = className;
+            // classEdit.TeacherId = classEdit.Teacher.TeacherId;
+
+            await _context.SaveChangesAsync();
+            return RedirectToAction(nameof(ManageClasses));
+        }
+
         //------------------ Quản lý giáo viên ------------------
         // Get Manage Teachers
         public async Task<IActionResult> ManageTeachers(int page = 1, int pageSize = 10)
