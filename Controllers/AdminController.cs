@@ -24,14 +24,15 @@ namespace Qltt.Controllers
         }
 
         //------------------ Quản lý lớp học ------------------
-        public async Task<IActionResult> ManageClasses()
+        public async Task<IActionResult> ManageClasses(int page = 1, int pageSize = 10)
         {
             var classes = await _context.Classes.ToListAsync(); // Giả sử bạn lấy danh sách lớp
             if (classes == null)
             {
                 return NotFound(); // Xử lý nếu không tìm thấy lớp nào
             }
-            return View(classes); // Truyền danh sách lớp vào view
+            var pagedClasses = classes.ToPagedList(page, pageSize);
+            return View(pagedClasses); // Truyền danh sách lớp vào view
         }
 
         public IActionResult CreateClass() { return View(); }
@@ -90,13 +91,14 @@ namespace Qltt.Controllers
         }
 
         //------------------ Quản lý giáo viên ------------------
-        public async Task<IActionResult> ManageTeachers()
+        public async Task<IActionResult> ManageTeachers(int page = 1, int pageSize = 10)
         {
             var teachers = await _context.Teachers
             .Include(t => t.Classes)
             .Include(t => t.User)
             .ToListAsync(); // Đảm bảo dữ liệu không null
-            return View(teachers);
+            var pagedTeachers = teachers.ToPagedList(page, pageSize);
+            return View(pagedTeachers);
         }
 
         public IActionResult AddTeacher() { return View(); }
