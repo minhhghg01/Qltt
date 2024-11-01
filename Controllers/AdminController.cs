@@ -91,6 +91,7 @@ namespace Qltt.Controllers
         }
 
         //------------------ Quản lý giáo viên ------------------
+        // Get Manage Teachers
         public async Task<IActionResult> ManageTeachers(int page = 1, int pageSize = 10)
         {
             var teachers = await _context.Teachers
@@ -101,8 +102,10 @@ namespace Qltt.Controllers
             return View(pagedTeachers);
         }
 
+        // Get Add Teacher
         public IActionResult AddTeacher() { return View(); }
 
+        // Post Add Teacher
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> AddTeacher(
@@ -149,6 +152,7 @@ namespace Qltt.Controllers
             return RedirectToAction(nameof(ManageTeachers));
         }
 
+        // Get Delete Teacher
         public async Task<IActionResult> DeleteTeacher(int id)
         {
             var teacher = await _context.Teachers
@@ -163,12 +167,14 @@ namespace Qltt.Controllers
             return View(teacher);
         }
 
+        // Post Delete Teacher
         [HttpPost, ActionName("DeleteTeacher")]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteTeacherConfirmed(int id)
         {
             var teacher = await _context.Teachers
-                .Include(t => t.User)
+        .Include(t => t.User)
+                .Include(t => t.Classes) // Thêm Include Classes
                 .FirstOrDefaultAsync(t => t.TeacherId == id);
 
             if (teacher == null)
@@ -176,7 +182,20 @@ namespace Qltt.Controllers
                 return NotFound();
             }
 
+            // Xóa các Class liên kết với Teacher
+            foreach (var cls in teacher.Classes)
+            {
+                cls.TeacherId = null;
+            }
+
             _context.Teachers.Remove(teacher);
+
+            // Xóa User
+            if (teacher.User != null)
+    {
+                _context.Users.Remove(teacher.User);
+            }
+
             await _context.SaveChangesAsync();
             return RedirectToAction(nameof(ManageTeachers));
         }

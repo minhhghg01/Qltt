@@ -1,0 +1,28 @@
+@model Qltt.Models.Teacher
+@{
+    ViewData["Title"] = "EditTeacher";
+}
+
+<div class="container mt-4">
+    <h2 class="text-center">Sửa thông tin giáo viên</h2>
+    <form asp-action="EditTeacher" method="post">
+        <div class="form-group">
+            <label asp-for="User.FirstName">Họ</label>
+            <input asp-for="User.FirstName" class="form-control" />
+        </div>
+        <div class="form-group">
+            <label asp-for="User.LastName">Tên</label>
+            <input asp-for="User.LastName" class="form-control" />
+        </div>
+        <div class="form-group">
+            <label asp-for="User.Email">Email</label>
+            <input asp-for="User.Email" class="form-control" />
+        </div>
+        <div class="form-group">
+            <label asp-for="User.Password">Mật khẩu</label>
+            <input asp-for="User.Password" class="form-control" />
+        </div>
+        <a type="submit" class="btn btn-success">Lưu</a>
+    </form>
+</div>
+
