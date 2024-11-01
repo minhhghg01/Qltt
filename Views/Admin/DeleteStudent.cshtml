@@ -1,0 +1,18 @@
+@model Student
+
+<h2>Xác nhận xóa học sinh</h2>
+<div>
+    <h4>Bạn có chắc chắn muốn xóa học sinh này?</h4>
+    <hr />
+    <dl class="row">
+        <dt class="col-sm-2">Họ và tên:</dt>
+        <dd class="col-sm-10">@Model.User.FirstName @Model.User.LastName</dd>
+        <dt class="col-sm-2">Email:</dt>
+        <dd class="col-sm-10">@Model.User.Email</dd>
+    </dl>
+    <form asp-action="DeleteStudent">
+        <input type="hidden" asp-for="StudentId" />
+        <input type="submit" value="Xóa" class="btn btn-danger" />
+        <a asp-action="ManageStudents" class="btn btn-secondary">Quay lại</a>
+    </form>
+</div>
