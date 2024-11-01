@@ -4,6 +4,7 @@ using Qltt.Data;
 using Microsoft.EntityFrameworkCore;
 using X.PagedList;
 using X.PagedList.Extensions;
+using Microsoft.Data.SqlClient;
 
 namespace Qltt.Controllers
 {
@@ -116,7 +117,7 @@ namespace Qltt.Controllers
             string className
         )
         {
-                    // Tạo User mới
+            // Tạo User mới
             var user = new Models.User
             {
                 Email = email,
@@ -139,7 +140,7 @@ namespace Qltt.Controllers
             _context.Teachers.Add(newTeacher);
             await _context.SaveChangesAsync();
 
-            // Tạo một Class mới mà không cần TeacherId
+            // Tạo một Class mới 
             var newClass = new Models.Class
             {
                 ClassName = className,
@@ -192,13 +193,69 @@ namespace Qltt.Controllers
 
             // Xóa User
             if (teacher.User != null)
-    {
+            {
                 _context.Users.Remove(teacher.User);
             }
 
             await _context.SaveChangesAsync();
             return RedirectToAction(nameof(ManageTeachers));
         }
+
+        // Get Edit Teacher
+        public async Task<IActionResult> EditTeacher(int id)
+        {
+            var teacher = await _context.Teachers.FindAsync(id);
+            return View(teacher);
+        }
+
+        // Post Edit Teacher
+        [HttpPost]
+[ValidateAntiForgeryToken]
+public async Task<IActionResult> EditTeacher(int id, string firstName, string lastName, string email, string password)
+{
+    // Tìm Teacher và User liên kết từ cơ sở dữ liệu
+    var existingTeacher = await _context.Teachers
+        .Include(t => t.User)
+        .FirstOrDefaultAsync(t => t.TeacherId == id);
+
+    if (existingTeacher == null)
+    {
+        return NotFound();
+    }
+
+    if (ModelState.IsValid)
+    {
+        try
+        {
+            // Sử dụng câu lệnh SQL thuần để cập nhật User
+            var sql = "UPDATE Users SET FirstName = @FirstName, LastName = @LastName, Email = @Email, Password = @Password WHERE UserId = @UserId";
+            await _context.Database.ExecuteSqlRawAsync(sql,
+                new SqlParameter("@FirstName", firstName ?? (object)DBNull.Value),
+                new SqlParameter("@LastName", lastName ?? (object)DBNull.Value),
+                new SqlParameter("@Email", email ?? (object)DBNull.Value),
+                new SqlParameter("@Password", password ?? (object)DBNull.Value),
+                new SqlParameter("@UserId", existingTeacher.UserId));
+
+            return RedirectToAction(nameof(ManageTeachers));
+        }
+        catch (DbUpdateConcurrencyException)
+        {
+            if (!_context.Teachers.Any(t => t.TeacherId == id))
+            {
+                return NotFound();
+            }
+            else
+            {
+                throw;
+            }
+        }
+    }
+
+    return View(existingTeacher);
+}
+
+
+
 
         //------------------ Quản lý học sinh ------------------
         public async Task<IActionResult> ManageStudents(int page = 1, int pageSize = 10)
