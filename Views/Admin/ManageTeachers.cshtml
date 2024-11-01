@@ -3,6 +3,23 @@
 
 <h2 class="mb-4">Quản lý Giáo viên</h2>
 
+<div class="d-flex align-items-center mb-3">
+    <a class="btn btn-success me-auto" asp-action="AddTeacher" asp-controller="Admin">
+        Thêm Giáo viên mới
+    </a>
+
+<nav>
+    <ul class="pagination justify-content-end">
+        @for (int i = 1; i <= ((IPagedList<Teacher>)Model).PageCount; i++)
+        {
+            <li class="page-item @(i == ((IPagedList<Teacher>)Model).PageNumber ? "active" : "")">
+                <a class="page-link" asp-action="ManageTeachers" asp-route-page="@i" asp-route-pageSize="@((IPagedList<Teacher>)Model).PageSize">@i</a>
+            </li>
+        }
+        </ul>
+    </nav>
+</div>
+
 <table class="table table-striped table-bordered">
     <thead class="table-dark">
         <tr>
@@ -32,18 +49,7 @@
     </tbody>
 </table>
 
-<a asp-action="AddTeacher" asp-controller="Admin" class="btn btn-success">Thêm Giáo viên mới</a>
 
-<nav>
-    <ul class="pagination justify-content-end">
-        @for (int i = 1; i <= ((IPagedList<Teacher>)Model).PageCount; i++)
-        {
-            <li class="page-item @(i == ((IPagedList<Teacher>)Model).PageNumber ? "active" : "")">
-                <a class="page-link" asp-action="ManageTeachers" asp-route-page="@i" asp-route-pageSize="@((IPagedList<Teacher>)Model).PageSize">@i</a>
-            </li>
-        }
-    </ul>
-</nav>
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">

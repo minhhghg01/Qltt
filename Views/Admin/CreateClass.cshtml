@@ -8,15 +8,19 @@
 
 <form asp-action="CreateClass" method="post">
     <div class="form-group">
-        <label asp-for="ClassName">Tên lớp</label>
-        <input asp-for="ClassName" class="form-control" />
-        <span asp-validation-for="ClassName" class="text-danger"></span>
-        <label asp-for="TeacherId">Giáo viên</label>
-        <select asp-for="TeacherId" asp-items="ViewBag.Teachers" class="form-control">
-            <option value="">-- Chọn giáo viên --</option>
-        </select>
-        <span asp-validation-for="TeacherId" class="text-danger"></span>
+        <label>Tên lớp</label>
+        <input type="text" name="className" class="form-control" required />
     </div>
+    <!-- Select Teacher -->
+    @* <div class="form-group">
+        <label>Giáo viên</label>
+        <select name="teacherEmail" class="form-control">
+            @foreach (var teacher in ViewBag.Teachers)
+            {
+                <option value="@teacher?.Email">@teacher?.firstName @teacher?.lastName</option>
+            }
+        </select>
+    </div> *@
 
     <div class="mt-3">
         <button type="submit" class="btn btn-primary">Tạo lớp</button>
@@ -24,6 +28,3 @@
     </div>
 </form>
 
-@section Scripts {
-    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
-}

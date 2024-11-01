@@ -36,19 +36,21 @@ namespace Qltt.Controllers
             return View(pagedClasses); // Truyền danh sách lớp vào view
         }
 
+        // Get Create Class
         public IActionResult CreateClass() { return View(); }
 
+        // Post Create Class
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> CreateClass([Bind("ClassId,ClassName")] Models.Class cls)
+        public async Task<IActionResult> CreateClass(string className)
         {
-            if (ModelState.IsValid)
+            var newClass = new Models.Class
             {
-                _context.Classes.Add(cls);
-                await _context.SaveChangesAsync();
-                return RedirectToAction(nameof(ManageClasses));
-            }
-            return View(cls);
+                ClassName = className,
+            };
+            _context.Classes.Add(newClass);
+            await _context.SaveChangesAsync();
+            return RedirectToAction(nameof(ManageClasses));
         }
 
         public async Task<IActionResult> DetailsClass(int id)
@@ -65,27 +67,38 @@ namespace Qltt.Controllers
             return View(classDetail);
         }
 
+        // Get Delete Class
         public async Task<IActionResult> DeleteClass(int id)
         {
-            var classDelete = await _context.Classes.FirstOrDefaultAsync(c => c.ClassId == id);
+            var classDelete = await _context.Classes
+            .Include(c => c.Students)
+            .FirstOrDefaultAsync(c => c.ClassId == id);
             if (classDelete == null)
             {
                 return NotFound();
             }
-            // _context.Classes.Remove(classDelete);
-            // await _context.SaveChangesAsync();
-            return RedirectToAction(nameof(ManageClasses));
+            return View(classDelete);
         }
 
+        // Post Delete Class
         [HttpPost, ActionName("DeleteClass")]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteClassConfirmed(int id)
         {
-            var classDelete = await _context.Classes.FindAsync(id);
+            var classDelete = await _context.Classes
+            .Include(c => c.Students)
+            .FirstOrDefaultAsync(c => c.ClassId == id);
             if (classDelete != null)
             {
                 _context.Classes.Remove(classDelete); // Xóa lớp khỏi DB
             }
+
+            // Xóa các Student trong lớp
+            if (classDelete.Students != null)
+            {
+                _context.Students.RemoveRange(classDelete.Students);
+            }
+
             await _context.SaveChangesAsync(); // Lưu thay đổi
 
             return RedirectToAction(nameof(ManageClasses));

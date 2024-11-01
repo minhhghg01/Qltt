@@ -3,6 +3,26 @@
 
 <h2 class="mb-4">Quản lý Học sinh</h2>
 
+<div class="d-flex align-items-center mb-3">
+    <!-- Nút Thêm Học sinh mới -->
+    <a class="btn btn-success me-auto" asp-action="AddStudent" asp-controller="Admin">
+        Thêm Học sinh mới
+    </a>
+
+    <!-- Thanh phân trang -->
+    <nav>
+        <ul class="pagination mb-0">
+            @for (int i = 1; i <= ((IPagedList<Student>)Model).PageCount; i++)
+            {
+                <li class="page-item @(i == ((IPagedList<Student>)Model).PageNumber ? "active" : "")">
+                    <a class="page-link" asp-action="ManageStudents" asp-route-page="@i" asp-route-pageSize="@((IPagedList<Student>)Model).PageSize">@i</a>
+                </li>
+            }
+        </ul>
+    </nav>
+</div>
+
+
 <table class="table table-striped table-bordered">
     <thead class="table-dark">
         <tr>
@@ -32,18 +52,7 @@
     </tbody>
 </table>
 
-<a class="btn btn-success" asp-action="AddStudent" asp-controller="Admin">Thêm Học sinh mới</a>
 
-<nav>
-    <ul class="pagination justify-content-end">
-        @for (int i = 1; i <= ((IPagedList<Student>)Model).PageCount; i++)
-        {
-            <li class="page-item @(i == ((IPagedList<Student>)Model).PageNumber ? "active" : "")">
-                <a class="page-link" asp-action="ManageStudents" asp-route-page="@i" asp-route-pageSize="@((IPagedList<Student>)Model).PageSize">@i</a>
-            </li>
-        }
-    </ul>
-</nav>
 
 <!-- Thêm lựa chọn số dòng mỗi trang -->
 @* <div class="form-group">
