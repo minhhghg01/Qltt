@@ -300,7 +300,7 @@ namespace Qltt.Controllers
         public async Task<IActionResult> ManageStudents(int page = 1, int pageSize = 10)
         {
             var students = await _context.Students
-        .Include(s => s.Class)
+                .Include(s => s.Class)
                 .Include(s => s.User)
                 .ToListAsync();
             var pagedStudents = students.ToPagedList(page, pageSize);
@@ -315,12 +315,12 @@ namespace Qltt.Controllers
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> AddStudent(
-    string email,
-    string firstName,
-    string lastName,
-    string password,
-    string className
-)
+            string email,
+            string firstName,
+            string lastName,
+            string password,
+            string className
+        )
         {
             // Kiểm tra nếu `email` bị null hoặc rỗng
             if (string.IsNullOrWhiteSpace(email))
@@ -344,7 +344,7 @@ namespace Qltt.Controllers
             await _context.SaveChangesAsync();
 
             // Tìm Class từ cơ sở dữ liệu
-           var classStudent = await _context.Classes.FirstOrDefaultAsync(c => c.ClassName == className);
+            var classStudent = await _context.Classes.FirstOrDefaultAsync(c => c.ClassName == className);
 
 
             // Kiểm tra nếu không tìm thấy Class
@@ -404,6 +404,61 @@ namespace Qltt.Controllers
 
             await _context.SaveChangesAsync();
             return RedirectToAction(nameof(ManageStudents));
+        }
+
+        // Get Edit Student
+        public async Task<IActionResult> EditStudent(int id)
+        {
+            var student = await _context.Students.FindAsync(id);
+            return View(student);
+        }
+
+        // Post Edit Student
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> EditStudent(int id, string firstName, string lastName, string email, string password)
+        {
+            // Tìm Student và User liên kết từ cơ sở dữ liệu
+            var existingStudent = await _context.Students
+                .Include(s => s.User)
+                .FirstOrDefaultAsync(s => s.StudentId == id);
+            
+            Console.WriteLine("hello" + existingStudent.UserId + " " + existingStudent.StudentId + " " + id);
+
+            if (existingStudent == null)
+            {
+                return NotFound();
+            }
+
+            if (ModelState.IsValid)
+            {
+                try
+                {
+                    // Sử dụng câu lệnh SQL thuần để cập nhật User
+                    var sql = "UPDATE Users SET FirstName = @FirstName, LastName = @LastName, Email = @Email, Password = @Password WHERE UserId = @UserId";
+                    await _context.Database.ExecuteSqlRawAsync(sql,
+                        new SqlParameter("@FirstName", firstName ?? (object)DBNull.Value),
+                        new SqlParameter("@LastName", lastName ?? (object)DBNull.Value),
+                        new SqlParameter("@Email", email ?? (object)DBNull.Value),
+                        new SqlParameter("@Password", password ?? (object)DBNull.Value),
+                        new SqlParameter("@UserId", existingStudent.UserId));
+
+                    return RedirectToAction(nameof(ManageStudents));
+                }
+                catch (DbUpdateConcurrencyException)
+                {
+                    if (!_context.Students.Any(s => s.StudentId == id))
+                    {
+                        return NotFound();
+                    }
+                    else
+                    {
+                        throw;
+                    }
+                }
+            }
+
+            return View(existingStudent);
         }
 
     }

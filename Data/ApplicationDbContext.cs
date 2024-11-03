@@ -46,6 +46,7 @@ namespace Qltt.Data
                     .OnDelete(DeleteBehavior.NoAction);
             });
 
+            //Cấu hình quan hệ giữa Teacher và User
             modelBuilder.Entity<Teacher>(entity =>
             {
                 entity.ToTable("Teachers");
@@ -54,6 +55,17 @@ namespace Qltt.Data
                     .HasForeignKey<Teacher>(t => t.UserId)
                     .OnDelete(DeleteBehavior.NoAction);
             });
+
+            //Cấu hình quan hệ giữa Student và User
+           modelBuilder.Entity<Student>(entity =>
+            {
+                entity.ToTable("Students");
+                entity.HasOne(s => s.User)
+                    .WithOne(u => u.Student)
+                    .HasForeignKey<Student>(s => s.UserId)
+                    .OnDelete(DeleteBehavior.NoAction);
+            });
+
 
             // Cấu hình quan hệ một-một giữa Teacher và Class với TeacherId là khóa ngoại trong bảng Classes
            modelBuilder.Entity<Class>()

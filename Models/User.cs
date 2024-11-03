@@ -33,5 +33,6 @@ namespace Qltt.Models
 
         // Navigation property
         public virtual Teacher Teacher { get; set; }
+        public virtual Student Student { get; set; }
     }
 }
