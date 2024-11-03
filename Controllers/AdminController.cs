@@ -315,14 +315,21 @@ namespace Qltt.Controllers
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> AddStudent(
-            string email,
-            string firstName,
-            string lastName,
-            string password,
-            string className
-        )
+    string email,
+    string firstName,
+    string lastName,
+    string password,
+    string className
+)
         {
-            // Tạo User mới
+            // Kiểm tra nếu `email` bị null hoặc rỗng
+            if (string.IsNullOrWhiteSpace(email))
+            {
+                ModelState.AddModelError("Email", "Email là bắt buộc.");
+                return View(); // Trả về view hiện tại và hiển thị lỗi
+            }
+
+            // Thêm User vào cơ sở dữ liệu
             var user = new Models.User
             {
                 Email = email,
@@ -332,12 +339,13 @@ namespace Qltt.Controllers
                 Role = "Student",
             };
 
-            // Thêm User vào cơ sở dữ liệu
+            // Tạo users
             _context.Users.Add(user);
             await _context.SaveChangesAsync();
 
             // Tìm Class từ cơ sở dữ liệu
-            var classStudent = await _context.Classes.FirstOrDefaultAsync(c => c.ClassName == className);
+           var classStudent = await _context.Classes.FirstOrDefaultAsync(c => c.ClassName == className);
+
 
             // Kiểm tra nếu không tìm thấy Class
             if (classStudent == null)
@@ -346,18 +354,16 @@ namespace Qltt.Controllers
                 return View(); // Trả về view hiện tại và hiển thị lỗi
             }
 
-            // Tạo Student mới với UserId của User và ClassId của lớp học
-            var newStudent = new Models.Student
-            {
-                UserId = user.UserId,
-                ClassId = classStudent.ClassId,
-            };
-
-            _context.Students.Add(newStudent);
-            await _context.SaveChangesAsync();
+            // Thêm Student vào cơ sở dữ liệu
+            var insertStudentQuery = "INSERT INTO Students (UserId, ClassId) VALUES (@UserId, @ClassId)";
+            await _context.Database.ExecuteSqlRawAsync(insertStudentQuery,
+                new SqlParameter("@UserId", user.UserId),
+                new SqlParameter("@ClassId", classStudent.ClassId)
+            );
 
             return RedirectToAction(nameof(ManageStudents));
         }
+
 
         // Get Delete Student
         public async Task<IActionResult> DeleteStudent(int id)

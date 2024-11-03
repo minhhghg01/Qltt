@@ -113,6 +113,7 @@ namespace Qltt.Data
                 entity.Property(e => e.Date).IsRequired();
             });
 
+            // Cấu hình quan hệ giữa Student và Class
             modelBuilder.Entity<Student>()
                 .HasOne(s => s.Class)
                 .WithMany(c => c.Students)

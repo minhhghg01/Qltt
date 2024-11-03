@@ -1,17 +1,32 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Authorization;
+using Qltt.Data;
+using Microsoft.EntityFrameworkCore;
 
 namespace Qltt.Controllers
 {
     [Authorize(Roles = "Teacher")]
     public class TeacherController : Controller
     {
-        public IActionResult Index() { return View(); }
-        // Quản lý học sinh
-        public IActionResult ManageStudents() { return View(); }
+        private readonly ApplicationDbContext _context;
 
-        // Quản lý lớp học
-        public IActionResult ManageClasses() { return View(); }
+        public TeacherController(ApplicationDbContext context)
+        {
+            _context = context;
+        }
+        public async Task<IActionResult> Index()
+        {
+            var userId = User.FindFirst("UserId")?.Value;
+            var user = await _context.Users.FindAsync(userId);
+            return View(user);
+        }
+
+        // Quản lý học sinh trong lớp
+        public async Task<IActionResult> ManageClass() {
+            var classId = User.FindFirst("ClassId")?.Value;
+            var students = await _context.Students.Where(s => s.ClassId == int.Parse(classId)).ToListAsync();
+            return View(students);
+        }
 
         // Quản lý môn học
         public IActionResult ManageSubjects() { return View(); }
