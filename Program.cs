@@ -10,13 +10,49 @@ builder.Services.AddDbContext<ApplicationDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 
 // Thêm Authentication
-builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
-    .AddCookie(options =>
+builder.Services.AddAuthentication(options =>
+{
+    options.DefaultAuthenticateScheme = CookieAuthenticationDefaults.AuthenticationScheme;
+    options.DefaultSignInScheme = CookieAuthenticationDefaults.AuthenticationScheme;
+    options.DefaultChallengeScheme = CookieAuthenticationDefaults.AuthenticationScheme;
+})
+.AddCookie(options =>
+{
+    options.LoginPath = "/Account/Login";
+    options.LogoutPath = "/Account/Logout";
+    options.AccessDeniedPath = "/Account/AccessDenied";
+    options.ExpireTimeSpan = TimeSpan.FromHours(1);
+    options.SlidingExpiration = true;
+    
+    // Xử lý các sự kiện authentication
+    options.Events = new CookieAuthenticationEvents
     {
-        options.LoginPath = "/Account/Login";
-        options.LogoutPath = "/Account/Logout";
-        options.AccessDeniedPath = "/Account/AccessDenied";
-    });
+        OnRedirectToLogin = context =>
+        {
+            // Kiểm tra nếu request là AJAX
+            if (context.Request.Headers["X-Requested-With"] == "XMLHttpRequest")
+            {
+                context.Response.StatusCode = 401;
+            }
+            else
+            {
+                context.Response.Redirect(context.RedirectUri);
+            }
+            return Task.CompletedTask;
+        }
+    };
+});
+
+// Thêm authorization
+builder.Services.AddAuthorization(options =>
+{
+    options.AddPolicy("RequireStudentRole", policy => 
+        policy.RequireRole("Student"));
+    options.AddPolicy("RequireTeacherRole", policy => 
+        policy.RequireRole("Teacher"));
+    options.AddPolicy("RequireAdminRole", policy => 
+        policy.RequireRole("Admin"));
+});
 
 // Thêm Session
 builder.Services.AddSession(options =>

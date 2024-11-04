@@ -33,72 +33,93 @@ namespace Qltt.Controllers
 
         // POST: Account/Login
         [HttpPost]
-[AllowAnonymous]
-[ValidateAntiForgeryToken]
-public async Task<IActionResult> Login(string email, string password)
-{
-    // Thêm log để debug
-    Console.WriteLine($"Login attempt - Email: {email}");
-
-    if (string.IsNullOrEmpty(email) || string.IsNullOrEmpty(password))
-    {
-        TempData["Error"] = "Vui lòng nhập email và mật khẩu";
-        return View();
-    }
-
-    var user = await _context.Users.FirstOrDefaultAsync(u => u.Email == email);
-
-    if (user != null && user.Password == password)
-    {
-        // Lấy teacherId từ bảng Teachers
-        var teacher = await _context.Teachers.FirstOrDefaultAsync(t => t.UserId == user.UserId);
-        
-        int? classId = null; // Khởi tạo biến ClassId
-        if (teacher != null)
+        [AllowAnonymous]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Login(string email, string password)
         {
-            // Lấy ClassId từ bảng Classes dựa trên teacherId
-            var classRecord = await _context.Classes.FirstOrDefaultAsync(c => c.TeacherId == teacher.TeacherId);
-            classId = classRecord?.ClassId; // Lấy ClassId từ lớp
+            try 
+            {
+                if (string.IsNullOrEmpty(email) || string.IsNullOrEmpty(password))
+                {
+                    TempData["Error"] = "Vui lòng nhập email và mật khẩu";
+                    return View();
+                }
+
+                var user = await _context.Users.FirstOrDefaultAsync(u => u.Email == email);
+
+                if (user != null && user.Password == password)
+                {
+                    var claims = new List<Claim>
+                    {
+                        new Claim(ClaimTypes.NameIdentifier, user.UserId.ToString()),
+                        new Claim(ClaimTypes.Email, user.Email),
+                        new Claim(ClaimTypes.Role, user.Role),
+                        new Claim(ClaimTypes.GivenName, user.FirstName),
+                        new Claim(ClaimTypes.Surname, user.LastName),
+                    };
+
+                    // Xử lý student với try-catch riêng
+                    try 
+                    {
+                        var student = await _context.Students.FirstOrDefaultAsync(s => s.UserId == user.UserId);
+                        if (student != null)
+                        {
+                            Console.WriteLine($"Found student - StudentId: {student.StudentId}, ClassId: {student.ClassId}");
+                            if (student.ClassId > 0)
+                            {
+                                claims.Add(new Claim("ClassId", student.ClassId.ToString()));
+                            }
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        Console.WriteLine($"Error processing student data: {ex.Message}");
+                    }
+
+                    var claimsIdentity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
+                    var authProperties = new AuthenticationProperties
+                    {
+                        IsPersistent = true,
+                        ExpiresUtc = DateTimeOffset.UtcNow.AddHours(1),
+                        // Thêm các options cho cookie
+                        AllowRefresh = true
+                    };
+
+                    try 
+                    {
+                        await HttpContext.SignInAsync(
+                            CookieAuthenticationDefaults.AuthenticationScheme,
+                            new ClaimsPrincipal(claimsIdentity),
+                            authProperties);
+                        
+                        HttpContext.Session.SetString("UserRole", user.Role);
+                        return RedirectToAction("Index", "Home");
+                    }
+                    catch (Exception ex)
+                    {
+                        Console.WriteLine($"Error during sign in: {ex.Message}");
+                        TempData["Error"] = "Có lỗi xảy ra khi đăng nhập. Vui lòng thử lại.";
+                        return View();
+                    }
+                }
+
+                TempData["Error"] = "Email hoặc mật khẩu không chính xác";
+                return View();
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Unexpected error in Login: {ex.Message}");
+                TempData["Error"] = "Có lỗi xảy ra. Vui lòng thử lại sau.";
+                return View();
+            }
         }
-
-        // Chỉ thêm vào claims nếu classId không null
-        var claims = new List<Claim>
-        {
-            new Claim(ClaimTypes.Email, user.Email),
-            new Claim(ClaimTypes.Role, user.Role),
-            new Claim(ClaimTypes.GivenName, user.FirstName),
-            new Claim(ClaimTypes.Surname, user.LastName),
-            // new Claim("ClassId", classId?.ToString())
-        };
-
-        var claimsIdentity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
-        var authProperties = new AuthenticationProperties
-        {
-            IsPersistent = true,
-            ExpiresUtc = DateTimeOffset.UtcNow.AddHours(1)
-        };
-
-        await HttpContext.SignInAsync(
-            CookieAuthenticationDefaults.AuthenticationScheme,
-            new ClaimsPrincipal(claimsIdentity),
-            authProperties);
-
-        HttpContext.Session.SetString("UserRole", user.Role);
-
-        return RedirectToAction("Index", "Home");
-    }
-
-    TempData["Error"] = "Email hoặc mật khẩu không chính xác";
-    return View();
-}
-
 
 
         public async Task<IActionResult> Logout()
         {
             // Đăng xuất
             await HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
-            
+
             // Xóa cache
             Response.Headers["Cache-Control"] = "no-cache, no-store, must-revalidate";
             Response.Headers["Pragma"] = "no-cache";

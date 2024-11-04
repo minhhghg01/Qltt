@@ -1,9 +1,11 @@
 using System.Diagnostics;
 using Microsoft.AspNetCore.Mvc;
 using Qltt.Models;
+using Microsoft.AspNetCore.Authorization;
 
 namespace Qltt.Controllers;
 
+[Authorize]
 public class HomeController : Controller
 {
     private readonly ILogger<HomeController> _logger;
@@ -13,20 +15,16 @@ public class HomeController : Controller
         _logger = logger;
     }
 
+    [AllowAnonymous]
     public IActionResult Index()
     {
-        if (User.Identity.IsAuthenticated)
-        {
-            if (User.IsInRole("Admin"))
-            {
-                return RedirectToAction("Index", "Admin");
-            }
-            else if (User.IsInRole("Teacher"))
-            {
-                return RedirectToAction("Index", "Teacher");
-            }
-        }
-        return RedirectToAction("Login", "Account");
+        return View();
+    }
+
+    [Authorize(Roles = "Student,Teacher,Admin")]
+    public IActionResult Dashboard()
+    {
+        return View();
     }
 
     [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
