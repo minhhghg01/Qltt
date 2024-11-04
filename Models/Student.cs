@@ -17,5 +17,11 @@ namespace Qltt.Models
 
         public virtual ICollection<StudentTest> StudentTests { get; set; }
         public virtual ICollection<Attendance> Attendances { get; set; }
+
+        [NotMapped]
+        public int AttendanceCount { get; set; } // Tổng số buổi
+
+        [NotMapped]
+        public int PresentCount { get; set; }    // Số buổi có mặt
     }
 }

@@ -26,7 +26,7 @@ namespace Qltt.Controllers
         // Điểm danh học sinh
         public async Task<IActionResult> Attendance()
         {
-            // Đoạn mã lấy classId như trước
+            // Đoạn mã lấy classId
             var classId = User.FindFirst("ClassId")?.Value;
             if (string.IsNullOrEmpty(classId))
             {
@@ -47,7 +47,7 @@ namespace Qltt.Controllers
             // Lấy tên lớp học
             var className = await _context.Classes
                 .Where(c => c.ClassId == classIdInt)
-                .Select(c => c.ClassName) // Giả sử bạn có trường ClassName trong bảng Classes
+                .Select(c => c.ClassName)
                 .FirstOrDefaultAsync();
 
             ViewBag.ClassName = className;
@@ -55,10 +55,17 @@ namespace Qltt.Controllers
             // Tính tổng số buổi và số buổi có mặt
             foreach (var student in students)
             {
+                // Đếm tổng số buổi
                 var attendanceCount = await _context.Attendances
                     .CountAsync(a => a.StudentId == student.StudentId);
+
+                // Đếm số buổi có mặt
                 var presentCount = await _context.Attendances
                     .CountAsync(a => a.StudentId == student.StudentId && a.IsPresent);
+
+                // Gán giá trị cho thuộc tính AttendanceCount và PresentCount
+                student.AttendanceCount = attendanceCount; // Tổng số buổi
+                student.PresentCount = presentCount;       // Số buổi có mặt
             }
 
             return View(students);

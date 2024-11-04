@@ -21,7 +21,7 @@
                     <td>@(Model.IndexOf(student) + 1)</td>
                     <td>@student.User.FirstName </td>
                     <td>@student.User.LastName</td>
-                    <td class="text-center">@student.Attendances?.Count </td>
+                    <td class="text-center">@student.PresentCount / @student.AttendanceCount</td>
                 </tr>
             }
         </tbody>
