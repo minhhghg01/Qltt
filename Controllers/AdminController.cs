@@ -5,6 +5,7 @@ using Microsoft.EntityFrameworkCore;
 using X.PagedList;
 using X.PagedList.Extensions;
 using Microsoft.Data.SqlClient;
+using Qltt.ViewModels;
 
 namespace Qltt.Controllers
 {
@@ -57,9 +58,11 @@ namespace Qltt.Controllers
         {
             var classDetail = await _context.Classes
             .Include(c => c.Students)
+                .ThenInclude(s => s.User)
             .Include(c => c.Teacher)
             .ThenInclude(t => t.User)
             .FirstOrDefaultAsync(c => c.ClassId == id);
+
             if (classDetail == null)
             {
                 return NotFound();
@@ -88,6 +91,7 @@ namespace Qltt.Controllers
             var classDelete = await _context.Classes
             .Include(c => c.Students)
             .FirstOrDefaultAsync(c => c.ClassId == id);
+
             if (classDelete != null)
             {
                 _context.Classes.Remove(classDelete); // Xóa lớp khỏi DB
@@ -107,28 +111,56 @@ namespace Qltt.Controllers
         // Get Edit Class
         public async Task<IActionResult> EditClass(int id)
         {
-            var classEdit = await _context.Classes.FindAsync(id);
-            return View(classEdit);
+            var classEdit = await _context.Classes
+            .Include(c => c.Teacher)
+            // .ThenInclude(t => t.User)
+            .FirstOrDefaultAsync(c => c.ClassId == id);
+
+            // Lấy danh sách giáo viên không có lớp học nào
+            var availableTeachers = await _context.Teachers
+                .Where(t => !_context.Classes.Any(c => c.TeacherId == t.TeacherId))
+                .ToListAsync();
+
+            // Tạo view model
+            var viewModel = new EditClassViewModel
+            {
+                ClassId = classEdit.ClassId,
+                ClassName = classEdit.ClassName,
+                TeacherId = classEdit.TeacherId,
+                Teachers = availableTeachers
+            };
+
+            return View(viewModel);
         }
 
         // Post Edit Class
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> EditClass(int id, string className)
+        public async Task<IActionResult> EditClass(EditClassViewModel viewModel)
         {
-            var classEdit = await _context.Classes
-            .Include(c => c.Teacher)
-            .FirstOrDefaultAsync(c => c.ClassId == id);
+            if (!ModelState.IsValid)
+            {
+                // Nếu model không hợp lệ, trả lại view với dữ liệu đã nhập
+                return View(viewModel);
+            }
 
+            var classEdit = await _context.Classes.FindAsync(viewModel.ClassId);
             if (classEdit == null)
             {
                 return NotFound();
             }
 
-            classEdit.ClassName = className;
-            // classEdit.TeacherId = classEdit.Teacher.TeacherId;
+            classEdit.ClassName = viewModel.ClassName;;
 
+            // Nếu teacherId có giá trị, chỉ định giáo viên vào lớp
+            if (viewModel.TeacherId.HasValue)
+            {
+                classEdit.TeacherId = viewModel.TeacherId.Value;
+            }
+
+            _context.Update(classEdit);
             await _context.SaveChangesAsync();
+
             return RedirectToAction(nameof(ManageClasses));
         }
 
@@ -182,14 +214,17 @@ namespace Qltt.Controllers
             await _context.SaveChangesAsync();
 
             // Tạo một Class mới 
-            var newClass = new Models.Class
+            if (!string.IsNullOrEmpty(className))
             {
-                ClassName = className,
-                TeacherId = newTeacher.TeacherId,
-            };
+                var newClass = new Models.Class
+                {
+                    ClassName = className,
+                    TeacherId = newTeacher.TeacherId,
+                };
 
-            _context.Classes.Add(newClass);
-            await _context.SaveChangesAsync();
+                _context.Classes.Add(newClass);
+                await _context.SaveChangesAsync();
+            }
 
             return RedirectToAction(nameof(ManageTeachers));
         }
@@ -422,7 +457,7 @@ namespace Qltt.Controllers
             var existingStudent = await _context.Students
                 .Include(s => s.User)
                 .FirstOrDefaultAsync(s => s.StudentId == id);
-            
+
             Console.WriteLine("hello" + existingStudent.UserId + " " + existingStudent.StudentId + " " + id);
 
             if (existingStudent == null)

@@ -126,11 +126,11 @@ namespace Qltt.Data
             });
 
             // Cấu hình quan hệ giữa Student và Class
-            modelBuilder.Entity<Student>()
-                .HasOne(s => s.Class)
-                .WithMany(c => c.Students)
+            modelBuilder.Entity<Class>()
+        .HasMany(c => c.Students)
+        .WithOne(s => s.Class)
                 .HasForeignKey(s => s.ClassId)
-                .OnDelete(DeleteBehavior.Restrict);
+                .OnDelete(DeleteBehavior.Cascade);
 
             // Vô hiệu hóa cascade delete mặc định
             foreach (var relationship in modelBuilder.Model.GetEntityTypes()

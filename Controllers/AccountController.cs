@@ -33,51 +33,66 @@ namespace Qltt.Controllers
 
         // POST: Account/Login
         [HttpPost]
-        [AllowAnonymous]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Login(string email, string password)
+[AllowAnonymous]
+[ValidateAntiForgeryToken]
+public async Task<IActionResult> Login(string email, string password)
+{
+    // Thêm log để debug
+    Console.WriteLine($"Login attempt - Email: {email}");
+
+    if (string.IsNullOrEmpty(email) || string.IsNullOrEmpty(password))
+    {
+        TempData["Error"] = "Vui lòng nhập email và mật khẩu";
+        return View();
+    }
+
+    var user = await _context.Users.FirstOrDefaultAsync(u => u.Email == email);
+
+    if (user != null && user.Password == password)
+    {
+        // Lấy teacherId từ bảng Teachers
+        var teacher = await _context.Teachers.FirstOrDefaultAsync(t => t.UserId == user.UserId);
+        
+        int? classId = null; // Khởi tạo biến ClassId
+        if (teacher != null)
         {
-            // Thêm log để debug
-            Console.WriteLine($"Login attempt - Email: {email}");
-
-            if (string.IsNullOrEmpty(email) || string.IsNullOrEmpty(password))
-            {
-                TempData["Error"] = "Vui lòng nhập email và mật khẩu";
-                return View();
-            }
-
-            var user = await _context.Users.FirstOrDefaultAsync(u => u.Email == email);
-
-            if (user != null && user.Password == password)
-            {
-                var claims = new List<Claim>
-                {
-                    new Claim(ClaimTypes.Email, user.Email),
-                    new Claim(ClaimTypes.Role, user.Role),
-                    new Claim(ClaimTypes.GivenName, user.FirstName),
-                    new Claim(ClaimTypes.Surname, user.LastName)
-                };
-
-                var claimsIdentity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
-                var authProperties = new AuthenticationProperties
-                {
-                    IsPersistent = true,
-                    ExpiresUtc = DateTimeOffset.UtcNow.AddHours(1)
-                };
-
-                await HttpContext.SignInAsync(
-                    CookieAuthenticationDefaults.AuthenticationScheme,
-                    new ClaimsPrincipal(claimsIdentity),
-                    authProperties);
-
-                HttpContext.Session.SetString("UserRole", user.Role);
-
-                return RedirectToAction("Index", "Home");
-            }
-
-            TempData["Error"] = "Email hoặc mật khẩu không chính xác";
-            return View();
+            // Lấy ClassId từ bảng Classes dựa trên teacherId
+            var classRecord = await _context.Classes.FirstOrDefaultAsync(c => c.TeacherId == teacher.TeacherId);
+            classId = classRecord?.ClassId; // Lấy ClassId từ lớp
         }
+
+        // Chỉ thêm vào claims nếu classId không null
+        var claims = new List<Claim>
+        {
+            new Claim(ClaimTypes.Email, user.Email),
+            new Claim(ClaimTypes.Role, user.Role),
+            new Claim(ClaimTypes.GivenName, user.FirstName),
+            new Claim(ClaimTypes.Surname, user.LastName),
+            // new Claim("ClassId", classId?.ToString())
+        };
+
+        var claimsIdentity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
+        var authProperties = new AuthenticationProperties
+        {
+            IsPersistent = true,
+            ExpiresUtc = DateTimeOffset.UtcNow.AddHours(1)
+        };
+
+        await HttpContext.SignInAsync(
+            CookieAuthenticationDefaults.AuthenticationScheme,
+            new ClaimsPrincipal(claimsIdentity),
+            authProperties);
+
+        HttpContext.Session.SetString("UserRole", user.Role);
+
+        return RedirectToAction("Index", "Home");
+    }
+
+    TempData["Error"] = "Email hoặc mật khẩu không chính xác";
+    return View();
+}
+
+
 
         public async Task<IActionResult> Logout()
         {
