@@ -93,7 +93,19 @@ namespace Qltt.Controllers
                             authProperties);
                         
                         HttpContext.Session.SetString("UserRole", user.Role);
-                        return RedirectToAction("Index", "Home");
+
+                        // Sau khi đăng nhập thành công, chuyển hướng theo role
+                        switch (user.Role.ToLower())
+                        {
+                            case "student":
+                                return RedirectToAction("Index", "Student");
+                            case "teacher":
+                                return RedirectToAction("Index", "Teacher");
+                            case "admin":
+                                return RedirectToAction("Index", "Admin");
+                            default:
+                                return RedirectToAction("Index", "Home");
+                        }
                     }
                     catch (Exception ex)
                     {

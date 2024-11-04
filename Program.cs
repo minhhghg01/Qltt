@@ -39,6 +39,11 @@ builder.Services.AddAuthentication(options =>
                 context.Response.Redirect(context.RedirectUri);
             }
             return Task.CompletedTask;
+        },
+        OnRedirectToAccessDenied = context =>
+        {
+            context.Response.Redirect("/Account/AccessDenied");
+            return Task.CompletedTask;
         }
     };
 });
