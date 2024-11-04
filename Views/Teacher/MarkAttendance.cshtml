@@ -24,9 +24,11 @@
                         <td>@student.User.FirstName</td>
                         <td>@student.User.LastName</td>
                         <td>
-                            <input type="hidden" name="isPresent[@i]" value="false" />
-                            <input type="checkbox" name="isPresent[@i]" value="true" /> Có mặt
                             <input type="hidden" name="studentIds[@i]" value="@student.StudentId" />
+                            <select name="isPresent[@i]">
+                                <option value="false">Vắng mặt</option>
+                                <option value="true">Có mặt</option>
+                            </select>
                         </td>
                     </tr>
                 }

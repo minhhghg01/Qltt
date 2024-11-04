@@ -67,7 +67,7 @@ namespace Qltt.Controllers
         // Get MarkAttendance
         public async Task<IActionResult> MarkAttendanceAsync()
         {
-             var classId = User.FindFirst("ClassId")?.Value;
+            var classId = User.FindFirst("ClassId")?.Value;
             if (string.IsNullOrEmpty(classId))
             {
                 classId = "1"; // Mặc định là 1
@@ -129,6 +129,18 @@ namespace Qltt.Controllers
 
                 _context.Attendances.Add(attendance);
             }
+
+            // In ra danh sách studentIds và isPresent
+            foreach (var id in studentIds)
+            {
+                Console.WriteLine("hehe StudentId: " + id);
+            }
+
+            foreach (var present in isPresent)
+            {
+                Console.WriteLine("IsPresent: " + present);
+            }
+
 
             await _context.SaveChangesAsync();
             return RedirectToAction("Attendance"); // Quay lại trang chỉ định sau khi điểm danh
