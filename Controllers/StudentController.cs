@@ -65,30 +65,40 @@ namespace Qltt.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> Submit(int correctCount, int totalQuestions, int testId)
+        public async Task<IActionResult> Submit([FromBody] SubmitModel model)
         {
+            // try 
+            // {
+                var userId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)?.Value ?? "0");
+                var student = await _context.Students.FirstOrDefaultAsync(s => s.UserId == userId);
 
-            var studentId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)?.Value);
+                if (student == null)
+                {
+                    return BadRequest("Không tìm thấy thông tin học sinh!");
+                }
 
+                decimal score = ((decimal)model.correctCount / model.totalQuestions) * 100;
 
+                var studentTest = new StudentTest
+                {
+                    StudentId = student.StudentId,
+                    TestId = model.testId,
+                    Score = score, 
+                };
 
-            // Quy đổi sang thang điểm 10
-            decimal score = (correctCount / totalQuestions) * 10;
+                _context.StudentTests.Add(studentTest);
+                await _context.SaveChangesAsync();
 
-            // Lưu kết quả
-            var studentTest = new StudentTest
-            {
-                StudentId = studentId,
-                TestId = testId,
-                Score = score
-            };
-
-            _context.StudentTests.Add(studentTest);
-            await _context.SaveChangesAsync();
-
-
-            return RedirectToAction("Result", new { id = studentTest.StudentTestId });
-        }
+                return RedirectToAction("Result", new { id = studentTest.StudentTestId });
+            }
+            // catch (Exception ex)
+            // {
+            //     // Log chi tiết lỗi
+            //     Console.WriteLine($"Error details: {ex.Message}");
+            //     Console.WriteLine($"Inner exception: {ex.InnerException?.Message}");
+            //     return BadRequest(ex.InnerException?.Message ?? ex.Message);
+            // }
+        // }
 
         public async Task<IActionResult> Result(int id)
         {
@@ -103,6 +113,13 @@ namespace Qltt.Controllers
 
             return View();
         }
+    }
+
+    public class SubmitModel
+    {
+        public int correctCount { get; set; }
+        public int totalQuestions { get; set; }
+        public int testId { get; set; }
     }
 }
 

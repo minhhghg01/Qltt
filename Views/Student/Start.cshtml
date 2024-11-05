@@ -19,29 +19,29 @@
                                 <i class="fas fa-flag"></i> Đánh dấu
                             </button>
                         </div>
-                        
+
                         <div class="answers">
                             <label class="answer-option">
-                                <input type="radio" name="answers[@question.QuestionId]" value="A" 
-                                       onchange="updateProgress(@(i+1), @question.QuestionId, '@question.OptionA', '@question.CorrectAnswer')">
+                                <input type="radio" name="answers[@question.QuestionId]" value="A"
+                                    onchange="updateProgress(@(i+1), @question.QuestionId, '@question.OptionA', '@question.CorrectAnswer')">
                                 <span>A. @question.OptionA</span>
                             </label>
-                            
+
                             <label class="answer-option">
                                 <input type="radio" name="answers[@question.QuestionId]" value="B"
-                                       onchange="updateProgress(@(i+1), @question.QuestionId, '@question.OptionB', '@question.CorrectAnswer')">
+                                    onchange="updateProgress(@(i+1), @question.QuestionId, '@question.OptionB', '@question.CorrectAnswer')">
                                 <span>B. @question.OptionB</span>
                             </label>
-                            
+
                             <label class="answer-option">
                                 <input type="radio" name="answers[@question.QuestionId]" value="C"
-                                       onchange="updateProgress(@(i+1), @question.QuestionId, '@question.OptionC', '@question.CorrectAnswer')">
+                                    onchange="updateProgress(@(i+1), @question.QuestionId, '@question.OptionC', '@question.CorrectAnswer')">
                                 <span>C. @question.OptionC</span>
                             </label>
-                            
+
                             <label class="answer-option">
                                 <input type="radio" name="answers[@question.QuestionId]" value="D"
-                                       onchange="updateProgress(@(i+1), @question.QuestionId, '@question.OptionD', '@question.CorrectAnswer')">
+                                    onchange="updateProgress(@(i+1), @question.QuestionId, '@question.OptionD', '@question.CorrectAnswer')">
                                 <span>D. @question.OptionD</span>
                             </label>
                         </div>
@@ -108,23 +108,23 @@
 
         function updateProgress(questionNumber, questionId, selectedAnswer, correctAnswer) {
             answeredQuestions.add(questionNumber);
-            
+
             if (selectedAnswer === correctAnswer) {
                 correctAnswers.add(questionNumber);
             } else {
                 correctAnswers.delete(questionNumber);
             }
-            
+
             document.getElementById('answered-count').textContent = answeredQuestions.size;
             document.getElementById('correct-count').textContent = correctAnswers.size;
-            
+
             const navButton = document.getElementById(`nav-${questionNumber}`);
             navButton.classList.add('answered');
-            
+
             if (markedQuestions.has(questionNumber)) {
                 navButton.classList.add('marked');
             }
-            
+
             const questionCard = document.getElementById(`question-${questionNumber}`);
             questionCard.querySelectorAll('.answer-option').forEach(option => {
                 if (option.querySelector('input').checked) {
@@ -138,7 +138,7 @@
         function toggleMark(questionNumber) {
             const button = document.querySelector(`#question-${questionNumber} .mark-question`);
             const navButton = document.getElementById(`nav-${questionNumber}`);
-            
+
             if (markedQuestions.has(questionNumber)) {
                 markedQuestions.delete(questionNumber);
                 button.classList.remove('marked');
@@ -148,11 +148,11 @@
                 button.classList.add('marked');
                 navButton.classList.add('marked');
             }
-            
+
             if (answeredQuestions.has(questionNumber)) {
                 navButton.classList.add('answered');
             }
-            
+
             document.getElementById('marked-count').textContent = markedQuestions.size;
         }
 
@@ -165,38 +165,44 @@
         function confirmSubmit() {
             const totalQuestions = @Model?.Count;
             const correctCount = correctAnswers.size;
-            const testId = @Model?.FirstOrDefault()?.TestId;
-            
+            const testId = @Model.FirstOrDefault()?.TestId;
+
             // Log ra console để debug
             console.log('Số câu đúng:', correctCount);
             console.log('Tổng số câu:', totalQuestions);
             console.log('TestId:', testId);
-            
+
             if (confirm(`Bạn đã làm đúng ${correctCount}/${totalQuestions} câu.\nBạn có chắc chắn muốn nộp bài?`)) {
+                // Log dữ liệu gửi đi
+                const submitData = {
+                    correctCount: correctCount,
+                    totalQuestions: totalQuestions,
+                    testId: testId
+                };
+                console.log('Dữ liệu gửi đi:', submitData);
+
                 fetch('@Url.Action("Submit", "Student")', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json'
                     },
-                    body: JSON.stringify({
-                        correctCount: correctCount,
-                        totalQuestions: totalQuestions,
-                        testId: testId
-                    })
+                    body: JSON.stringify(submitData)
                 })
-                .then(response => response.json())
-                .then(data => {
-                    if (data.success) {
+                    .then(response => {
+                        console.log('Response status:', response.status);
+                        if (!response.ok) {
+                            return response.text().then(text => {
+                                throw new Error(text);
+                            });
+                        }
                         window.location.href = '@Url.Action("Result", "Student")';
-                    } else {
-                        alert('Có lỗi xảy ra: ' + data.message);
-                    }
-                })
-                .catch(error => {
-                    console.error('Error:', error);
-                    alert('Có lỗi xảy ra khi nộp bài');
-                });
-                
+
+                    })
+                    .catch(error => {
+                        console.error('Chi tiết lỗi:', error);
+                        alert('Có lỗi xảy ra khi nộp bài: ' + error.message);
+                    });
+
                 return false;
             }
             return false;
@@ -236,7 +242,7 @@
         background: white;
         padding: 20px;
         border-radius: 10px;
-        box-shadow: 0 0 15px rgba(0,0,0,0.1);
+        box-shadow: 0 0 15px rgba(0, 0, 0, 0.1);
         position: fixed;
         right: 20px;
         top: 60px;
@@ -267,7 +273,7 @@
         background: white;
         padding: 20px;
         border-radius: 10px;
-        box-shadow: 0 0 15px rgba(0,0,0,0.1);
+        box-shadow: 0 0 15px rgba(0, 0, 0, 0.1);
         margin-bottom: 20px;
         max-width: 100%;
     }
@@ -333,9 +339,12 @@
         grid-template-columns: repeat(5, 1fr);
         gap: 8px;
         margin-top: 20px;
-        max-height: 300px; /* Giới hạn chiều cao */
-        overflow-y: auto; /* Thêm thanh cuộn */
-        padding-right: 5px; /* Thêm padding để tránh thanh cuộn che text */
+        max-height: 300px;
+        /* Giới hạn chiều cao */
+        overflow-y: auto;
+        /* Thêm thanh cuộn */
+        padding-right: 5px;
+        /* Thêm padding để tránh thanh cuộn che text */
     }
 
     .question-number {
