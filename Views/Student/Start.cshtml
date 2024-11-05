@@ -23,25 +23,25 @@
                         <div class="answers">
                             <label class="answer-option">
                                 <input type="radio" name="answers[@question.QuestionId]" value="A" 
-                                       onchange="updateProgress(@(i+1))">
+                                       onchange="updateProgress(@(i+1), @question.QuestionId, '@question.OptionA', '@question.CorrectAnswer')">
                                 <span>A. @question.OptionA</span>
                             </label>
                             
                             <label class="answer-option">
                                 <input type="radio" name="answers[@question.QuestionId]" value="B"
-                                       onchange="updateProgress(@(i+1))">
+                                       onchange="updateProgress(@(i+1), @question.QuestionId, '@question.OptionB', '@question.CorrectAnswer')">
                                 <span>B. @question.OptionB</span>
                             </label>
                             
                             <label class="answer-option">
                                 <input type="radio" name="answers[@question.QuestionId]" value="C"
-                                       onchange="updateProgress(@(i+1))">
+                                       onchange="updateProgress(@(i+1), @question.QuestionId, '@question.OptionC', '@question.CorrectAnswer')">
                                 <span>C. @question.OptionC</span>
                             </label>
                             
                             <label class="answer-option">
                                 <input type="radio" name="answers[@question.QuestionId]" value="D"
-                                       onchange="updateProgress(@(i+1))">
+                                       onchange="updateProgress(@(i+1), @question.QuestionId, '@question.OptionD', '@question.CorrectAnswer')">
                                 <span>D. @question.OptionD</span>
                             </label>
                         </div>
@@ -64,6 +64,7 @@
                 <div class="progress-info">
                     <h5>Tiến độ làm bài</h5>
                     <p>Đã trả lời: <span id="answered-count">0</span>/@(Model?.Count ?? 0) câu</p>
+                    <p>Số câu đúng: <span id="correct-count">0</span>/@(Model?.Count ?? 0) câu</p>
                     <p>Đã đánh dấu: <span id="marked-count">0</span> câu</p>
                 </div>
 
@@ -88,7 +89,8 @@
     <script>
         let markedQuestions = new Set();
         let answeredQuestions = new Set();
-        let timeLeft = 600; // Thời gian làm bài
+        let correctAnswers = new Set();
+        let timeLeft = 600;
 
         function updateTimer() {
             const minutes = Math.floor(timeLeft / 60);
@@ -104,19 +106,25 @@
             }
         }
 
-        function updateProgress(questionNumber) {
+        function updateProgress(questionNumber, questionId, selectedAnswer, correctAnswer) {
             answeredQuestions.add(questionNumber);
+            
+            if (selectedAnswer === correctAnswer) {
+                correctAnswers.add(questionNumber);
+            } else {
+                correctAnswers.delete(questionNumber);
+            }
+            
             document.getElementById('answered-count').textContent = answeredQuestions.size;
+            document.getElementById('correct-count').textContent = correctAnswers.size;
             
             const navButton = document.getElementById(`nav-${questionNumber}`);
             navButton.classList.add('answered');
             
-            // Giữ lại class marked nếu câu hỏi đã được đánh dấu
             if (markedQuestions.has(questionNumber)) {
                 navButton.classList.add('marked');
             }
             
-            // Highlight selected answer
             const questionCard = document.getElementById(`question-${questionNumber}`);
             questionCard.querySelectorAll('.answer-option').forEach(option => {
                 if (option.querySelector('input').checked) {
@@ -141,7 +149,6 @@
                 navButton.classList.add('marked');
             }
             
-            // Giữ lại class answered nếu câu hỏi đã được trả lời
             if (answeredQuestions.has(questionNumber)) {
                 navButton.classList.add('answered');
             }
@@ -156,10 +163,43 @@
         }
 
         function confirmSubmit() {
-            if (confirm('Bạn có chắc chắn muốn nộp bài?')) {
-                //document.getElementById('testForm').submit();
-                window.location.href = '@Url.Action("Result")';
+            const totalQuestions = @Model?.Count;
+            const correctCount = correctAnswers.size;
+            const testId = @Model?.FirstOrDefault()?.TestId;
+            
+            // Log ra console để debug
+            console.log('Số câu đúng:', correctCount);
+            console.log('Tổng số câu:', totalQuestions);
+            console.log('TestId:', testId);
+            
+            if (confirm(`Bạn đã làm đúng ${correctCount}/${totalQuestions} câu.\nBạn có chắc chắn muốn nộp bài?`)) {
+                fetch('@Url.Action("Submit", "Student")', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        correctCount: correctCount,
+                        totalQuestions: totalQuestions,
+                        testId: testId
+                    })
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        window.location.href = '@Url.Action("Result", "Student")';
+                    } else {
+                        alert('Có lỗi xảy ra: ' + data.message);
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    alert('Có lỗi xảy ra khi nộp bài');
+                });
+                
+                return false;
             }
+            return false;
         }
 
         // Initialize timer
