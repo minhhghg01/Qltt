@@ -17,6 +17,7 @@ namespace Qltt.Data
         public DbSet<Class> Classes { get; set; }
         public DbSet<Test> Tests { get; set; }
         public DbSet<StudentTest> StudentTests { get; set; }
+        public DbSet<Question> Questions { get; set; }
         public DbSet<Attendance> Attendances { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)

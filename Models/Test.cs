@@ -9,6 +9,7 @@ namespace Qltt.Models
 
         // Navigation properties
         public Class Class { get; set; }
-        public ICollection<StudentTest> StudentTests { get; set; }
+        public virtual ICollection<StudentTest> StudentTests { get; set; }
+        public virtual ICollection<Question> Questions { get; set; }
     }
 }

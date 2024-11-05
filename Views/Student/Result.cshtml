@@ -1,0 +1,108 @@
+@model StudentTest
+
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="test-container">
+                <h2 class="text-center mb-4" style="color: #2c3e50; font-weight: bold;">Kết quả bài kiểm tra</h2>
+                
+                <div class="test-info-box mb-4">
+                    <div class="score-info">
+                        <i class="fas fa-trophy"></i>
+                        <span>Điểm số: 100</span>
+                    </div>
+                    <div class="question-info">
+                        <i class="fas fa-question"></i>
+                        <span>Thời gian bắt đầu: 5/11/2024 10:00</span>
+                    </div>
+                    <div class="time-info">
+                        <i class="fas fa-clock"></i>
+                        <span>Thời gian nộp bài: 5/11/2024 10:10</span>
+                    </div>
+                </div>
+
+                <form asp-action="Tests" class="mt-4">
+                    <button type="submit" class="btn-start w-100">
+                        <i class="fas fa-play-circle"></i> Làm lại
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .test-container {
+        background: white;
+        padding: 2rem;
+        border-radius: 15px;
+        box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
+    }
+
+    .test-info-box {
+        background: #f8f9fa;
+        border-radius: 10px;
+        padding: 1.5rem;
+    }
+
+    .score-info, .question-info, .time-info, .note-info {
+        padding: 10px 0;
+        color: #2c3e50;
+        font-size: 1.1rem;
+    }
+
+    .score-info i {
+        color: #f1c40f;
+    }
+
+    .time-info i {
+        color: #3498db;
+    }
+
+    .note-info i {
+        color: #e74c3c;
+    }
+
+    .score-info i, .question-info i, .time-info i, .note-info i {
+        margin-right: 10px;
+        width: 20px;
+    }
+
+    .note-info {
+        font-style: italic;
+        font-size: 0.9rem;
+        color: #7f8c8d;
+    }
+
+    .btn-start {
+        background: linear-gradient(135deg, #3498db 0%, #2980b9 100%);
+        color: white;
+        border: none;
+        padding: 12px 20px;
+        border-radius: 8px;
+        font-weight: 600;
+        font-size: 1.1rem;
+        transition: all 0.3s ease;
+        cursor: pointer;
+    }
+
+    .btn-start:hover {
+        background: linear-gradient(135deg, #2980b9 0%, #2573a7 100%);
+        transform: translateY(-2px);
+        box-shadow: 0 5px 15px rgba(41, 128, 185, 0.3);
+    }
+
+    .btn-start i {
+        margin-right: 8px;
+    }
+
+    /* Animation khi load trang */
+    .test-container {
+        animation: slideIn 0.5s ease-out;
+    }
+
+</style>
+
+@section Scripts {
+    <script src="https://kit.fontawesome.com/your-font-awesome-kit.js"></script>
+}

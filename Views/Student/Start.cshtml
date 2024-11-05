@@ -1,0 +1,397 @@
+@model List<Question>
+
+<h2>Bài kiểm tra</h2>
+
+<div class="exam-container">
+    <div class="question-section">
+        <form>
+            @for (var i = 0; i < 40; i++)
+            {
+                <div class="question-card" id="question-@(i+1)">
+                    <div class="question-header">
+                        <h5>Câu @(i + 1): 1+1=?</h5>
+                        <button type="button" class="mark-question" onclick="toggleMark(@(i+1))">
+                            <i class="fas fa-flag"></i> Đánh dấu
+                        </button>
+                    </div>
+                    
+                    <div class="answers">
+                        <label class="answer-option">
+                            <input type="radio" name="answers[@i]" value="A" 
+                                   onchange="updateProgress(@(i+1))">
+                            <span>A. 2</span>
+                        </label>
+                        
+                        <label class="answer-option">
+                            <input type="radio" name="answers[@i]" value="B"
+                                   onchange="updateProgress(@(i+1))">
+                            <span>B. 3</span>
+                        </label>
+                        
+                        <label class="answer-option">
+                            <input type="radio" name="answers[@i]" value="C"
+                                   onchange="updateProgress(@(i+1))">
+                            <span>C. 4</span>
+                        </label>
+                        
+                        <label class="answer-option">
+                            <input type="radio" name="answers[@i]" value="D"
+                                   onchange="updateProgress(@(i+1))">
+                            <span>D. 5</span>
+                        </label>
+                    </div>
+                </div>
+            }
+
+            <div class="sidebar">
+                <div class="timer">
+                    <i class="fas fa-clock"></i>
+                    <span id="time-remaining">10:00</span>
+                </div>
+
+                <div class="progress-info">
+                    <h5>Tiến độ làm bài</h5>
+                    <p>Đã trả lời: <span id="answered-count">0</span>/40 câu</p>
+                    <p>Đã đánh dấu: <span id="marked-count">0</span> câu</p>
+                </div>
+
+                <div class="question-nav">
+                    @for (var j = 1; j <= 40; j++)
+                    {
+                        <div class="question-number" id="nav-@j" onclick="scrollToQuestion(@j)">
+                            @j
+                        </div>
+                    }
+                </div>
+
+                <button asp-action="Result" type="button" class="submit-btn" onclick="confirmSubmit()">
+                    <i class="fas fa-paper-plane"></i> Nộp bài
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        let markedQuestions = new Set();
+        let answeredQuestions = new Set();
+        let timeLeft = 600; // Thời gian làm bài
+
+        function updateTimer() {
+            const minutes = Math.floor(timeLeft / 60);
+            const seconds = timeLeft % 60;
+            document.getElementById('time-remaining').textContent =
+                `${minutes}:${seconds.toString().padStart(2, '0')}`;
+
+            // Nếu hết thời gian thì nộp bài
+            if (timeLeft <= 0) {
+                document.getElementById('testForm').submit();
+            } else {
+                timeLeft--;
+            }
+        }
+
+        function updateProgress(questionNumber) {
+            answeredQuestions.add(questionNumber);
+            document.getElementById('answered-count').textContent = answeredQuestions.size;
+            
+            const navButton = document.getElementById(`nav-${questionNumber}`);
+            navButton.classList.add('answered');
+            
+            // Giữ lại class marked nếu câu hỏi đã được đánh dấu
+            if (markedQuestions.has(questionNumber)) {
+                navButton.classList.add('marked');
+            }
+            
+            // Highlight selected answer
+            const questionCard = document.getElementById(`question-${questionNumber}`);
+            questionCard.querySelectorAll('.answer-option').forEach(option => {
+                if (option.querySelector('input').checked) {
+                    option.classList.add('selected');
+                } else {
+                    option.classList.remove('selected');
+                }
+            });
+        }
+
+        function toggleMark(questionNumber) {
+            const button = document.querySelector(`#question-${questionNumber} .mark-question`);
+            const navButton = document.getElementById(`nav-${questionNumber}`);
+            
+            if (markedQuestions.has(questionNumber)) {
+                markedQuestions.delete(questionNumber);
+                button.classList.remove('marked');
+                navButton.classList.remove('marked');
+            } else {
+                markedQuestions.add(questionNumber);
+                button.classList.add('marked');
+                navButton.classList.add('marked');
+            }
+            
+            // Giữ lại class answered nếu câu hỏi đã được trả lời
+            if (answeredQuestions.has(questionNumber)) {
+                navButton.classList.add('answered');
+            }
+            
+            document.getElementById('marked-count').textContent = markedQuestions.size;
+        }
+
+        function scrollToQuestion(number) {
+            document.getElementById(`question-${number}`).scrollIntoView({
+                behavior: 'smooth'
+            });
+        }
+
+        function confirmSubmit() {
+            if (confirm('Bạn có chắc chắn muốn nộp bài?')) {
+                //document.getElementById('testForm').submit();
+                window.location.href = '@Url.Action("Result")';
+            }
+        }
+
+        // Initialize timer
+        setInterval(updateTimer, 1000);
+
+        // Add click handlers for answer options
+        document.querySelectorAll('.answer-option').forEach(option => {
+            option.addEventListener('click', function () {
+                const radio = this.querySelector('input[type="radio"]');
+                radio.checked = true;
+                const event = new Event('change');
+                radio.dispatchEvent(event);
+            });
+        });
+    </script>
+}
+
+<style>
+    .exam-container {
+        display: flex;
+        gap: 20px;
+        padding: 20px;
+        margin-right: 320px;
+    }
+
+    .question-section {
+        flex: 1;
+        max-width: 800px;
+        margin: 0 auto;
+    }
+
+    .sidebar {
+        width: 300px;
+        background: white;
+        padding: 20px;
+        border-radius: 10px;
+        box-shadow: 0 0 15px rgba(0,0,0,0.1);
+        position: fixed;
+        right: 20px;
+        top: 60px;
+        color: #000;
+    }
+
+    .timer {
+        font-size: 24px;
+        text-align: center;
+        color: #000;
+        margin-bottom: 20px;
+        padding: 15px;
+        background: #f8f9fa;
+        border-radius: 8px;
+    }
+
+    .progress-info {
+        margin-bottom: 20px;
+        color: #000;
+    }
+
+    .progress-info h5 {
+        color: #000;
+        font-weight: 600;
+    }
+
+    .question-card {
+        background: white;
+        padding: 20px;
+        border-radius: 10px;
+        box-shadow: 0 0 15px rgba(0,0,0,0.1);
+        margin-bottom: 20px;
+        max-width: 100%;
+    }
+
+    .question-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 15px;
+    }
+
+    .question-header h5 {
+        color: #000;
+        font-weight: 600;
+        margin: 0;
+    }
+
+    .mark-question {
+        background: none;
+        border: 2px solid #e74c3c;
+        color: #e74c3c;
+        padding: 5px 10px;
+        border-radius: 5px;
+        cursor: pointer;
+        transition: all 0.3s;
+    }
+
+    .mark-question:hover {
+        background: #e74c3c;
+        color: white;
+    }
+
+    .marked {
+        background: #e74c3c;
+        color: white;
+    }
+
+    .answer-option {
+        display: block;
+        padding: 12px 15px;
+        margin-bottom: 10px;
+        border: 2px solid #eee;
+        border-radius: 8px;
+        cursor: pointer;
+        transition: all 0.3s;
+    }
+
+    .answer-option:hover {
+        border-color: #3498db;
+    }
+
+    .answer-option input[type="radio"] {
+        display: none;
+    }
+
+    .answer-option.selected {
+        border-color: #3498db;
+        background: #ebf5fb;
+    }
+
+    .question-nav {
+        display: grid;
+        grid-template-columns: repeat(5, 1fr);
+        gap: 8px;
+        margin-top: 20px;
+        max-height: 300px; /* Giới hạn chiều cao */
+        overflow-y: auto; /* Thêm thanh cuộn */
+        padding-right: 5px; /* Thêm padding để tránh thanh cuộn che text */
+    }
+
+    .question-number {
+        position: relative;
+        padding: 8px;
+        text-align: center;
+        background: #f8f9fa;
+        border-radius: 5px;
+        cursor: pointer;
+        color: #000;
+    }
+
+    /* Thêm indicator cho câu đã làm */
+    .question-number.answered::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 0;
+        height: 0;
+        border-top: 15px solid #2ecc71;
+        border-right: 15px solid transparent;
+    }
+
+    /* Thêm indicator cho câu đã đánh dấu */
+    .question-number.marked::after {
+        content: '';
+        position: absolute;
+        bottom: 0;
+        right: 0;
+        width: 0;
+        height: 0;
+        border-bottom: 15px solid #e74c3c;
+        border-left: 15px solid transparent;
+    }
+
+    .question-number.answered {
+        background: #2ecc71;
+        color: white;
+    }
+
+    .question-number.marked {
+        background: #e74c3c;
+        color: white;
+    }
+
+    .question-number.answered.marked {
+        background: linear-gradient(135deg, #2ecc71 50%, #e74c3c 50%);
+        color: white;
+    }
+
+    .submit-btn {
+        width: 100%;
+        padding: 12px;
+        background: #2ecc71;
+        color: white;
+        border: none;
+        border-radius: 8px;
+        margin-top: 20px;
+        cursor: pointer;
+        transition: all 0.3s;
+    }
+
+    .submit-btn:hover {
+        background: #27ae60;
+    }
+
+    @@media (max-width: 1200px) {
+        .exam-container {
+            margin-right: 0;
+            flex-direction: column;
+        }
+
+        .sidebar {
+            position: static;
+            width: 100%;
+            margin-top: 20px;
+        }
+
+        .question-section {
+            padding-right: 0;
+        }
+    }
+
+    .answer-option span {
+        color: #000;
+    }
+
+    .answer-option.selected span {
+        color: #000;
+    }
+
+    /* Style cho thanh cuộn */
+    .question-nav::-webkit-scrollbar {
+        width: 6px;
+    }
+
+    .question-nav::-webkit-scrollbar-track {
+        background: #f1f1f1;
+        border-radius: 3px;
+    }
+
+    .question-nav::-webkit-scrollbar-thumb {
+        background: #888;
+        border-radius: 3px;
+    }
+
+    .question-nav::-webkit-scrollbar-thumb:hover {
+        background: #555;
+    }
+</style>
