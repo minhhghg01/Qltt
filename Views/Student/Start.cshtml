@@ -1,45 +1,57 @@
 @model List<Question>
 
-<h2>Bài kiểm tra</h2>
+@{
+    ViewData["Title"] = "Bài kiểm tra";
+}
 
 <div class="exam-container">
     <div class="question-section">
         <form>
-            @for (var i = 0; i < 40; i++)
+            @if (Model != null && Model.Any())
             {
-                <div class="question-card" id="question-@(i+1)">
-                    <div class="question-header">
-                        <h5>Câu @(i + 1): 1+1=?</h5>
-                        <button type="button" class="mark-question" onclick="toggleMark(@(i+1))">
-                            <i class="fas fa-flag"></i> Đánh dấu
-                        </button>
+                for (var i = 0; i < Model.Count; i++)
+                {
+                    var question = Model[i];
+                    <div class="question-card" id="question-@(i+1)">
+                        <div class="question-header">
+                            <h5>Câu @(i + 1): @question.Content</h5>
+                            <button type="button" class="mark-question" onclick="toggleMark(@(i+1))">
+                                <i class="fas fa-flag"></i> Đánh dấu
+                            </button>
+                        </div>
+                        
+                        <div class="answers">
+                            <label class="answer-option">
+                                <input type="radio" name="answers[@question.QuestionId]" value="A" 
+                                       onchange="updateProgress(@(i+1))">
+                                <span>A. @question.OptionA</span>
+                            </label>
+                            
+                            <label class="answer-option">
+                                <input type="radio" name="answers[@question.QuestionId]" value="B"
+                                       onchange="updateProgress(@(i+1))">
+                                <span>B. @question.OptionB</span>
+                            </label>
+                            
+                            <label class="answer-option">
+                                <input type="radio" name="answers[@question.QuestionId]" value="C"
+                                       onchange="updateProgress(@(i+1))">
+                                <span>C. @question.OptionC</span>
+                            </label>
+                            
+                            <label class="answer-option">
+                                <input type="radio" name="answers[@question.QuestionId]" value="D"
+                                       onchange="updateProgress(@(i+1))">
+                                <span>D. @question.OptionD</span>
+                            </label>
+                        </div>
                     </div>
-                    
-                    <div class="answers">
-                        <label class="answer-option">
-                            <input type="radio" name="answers[@i]" value="A" 
-                                   onchange="updateProgress(@(i+1))">
-                            <span>A. 2</span>
-                        </label>
-                        
-                        <label class="answer-option">
-                            <input type="radio" name="answers[@i]" value="B"
-                                   onchange="updateProgress(@(i+1))">
-                            <span>B. 3</span>
-                        </label>
-                        
-                        <label class="answer-option">
-                            <input type="radio" name="answers[@i]" value="C"
-                                   onchange="updateProgress(@(i+1))">
-                            <span>C. 4</span>
-                        </label>
-                        
-                        <label class="answer-option">
-                            <input type="radio" name="answers[@i]" value="D"
-                                   onchange="updateProgress(@(i+1))">
-                            <span>D. 5</span>
-                        </label>
-                    </div>
+                }
+            }
+            else
+            {
+                <div class="alert alert-warning">
+                    Không có câu hỏi nào.
                 </div>
             }
 
@@ -51,12 +63,12 @@
 
                 <div class="progress-info">
                     <h5>Tiến độ làm bài</h5>
-                    <p>Đã trả lời: <span id="answered-count">0</span>/40 câu</p>
+                    <p>Đã trả lời: <span id="answered-count">0</span>/@(Model?.Count ?? 0) câu</p>
                     <p>Đã đánh dấu: <span id="marked-count">0</span> câu</p>
                 </div>
 
                 <div class="question-nav">
-                    @for (var j = 1; j <= 40; j++)
+                    @for (var j = 1; j <= (Model?.Count ?? 0); j++)
                     {
                         <div class="question-number" id="nav-@j" onclick="scrollToQuestion(@j)">
                             @j
@@ -64,7 +76,7 @@
                     }
                 </div>
 
-                <button asp-action="Result" type="button" class="submit-btn" onclick="confirmSubmit()">
+                <button type="button" class="submit-btn" onclick="confirmSubmit()">
                     <i class="fas fa-paper-plane"></i> Nộp bài
                 </button>
             </div>

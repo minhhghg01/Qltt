@@ -1,36 +1,39 @@
 @using System.Security.Claims
 @model IEnumerable<Test>
 
+@{
+    ViewData["Title"] = "Bài kiểm tra";
+}
+
 <div class="container mt-5">
     <div class="row justify-content-center">
         <div class="col-md-8">
             <div class="test-container">
-                <h2 class="text-center mb-4" style="color: #2c3e50; font-weight: bold;">Kiểm Tra</h2>
+                <h2 class="text-center mb-4">Bài Kiểm Tra</h2>
                 
                 <div class="test-info-box mb-4">
                     <div class="score-info">
                         <i class="fas fa-trophy"></i>
                         <span>Điểm cao nhất: 100/100</span>
                     </div>
-                    <div class="question-info">
-                        <i class="fas fa-question"></i>
-                        <span>Số câu hỏi: 40</span>
-                    </div>
                     <div class="time-info">
                         <i class="fas fa-clock"></i>
-                        <span>Thời gian làm bài: 10 phút</span>
+                        <span>Thời gian: 10 phút</span>
                     </div>
                     <div class="note-info">
                         <i class="fas fa-info-circle"></i>
-                        <span>Hãy làm bài kiểm tra đúng thời gian và đạt điểm cao nhất</span>
+                        <span>Làm bài nghiêm túc, không được gian lận</span>
                     </div>
                 </div>
 
-                <form method="post" asp-action="Start" class="mt-4">
-                    <button type="submit" class="btn-start w-100">
+                <div class="text-center">
+                    <a asp-controller="Student" 
+                       asp-action="Start" 
+                       asp-route-testId="3" 
+                       class="btn btn-primary btn-lg">
                         <i class="fas fa-play-circle"></i> Bắt Đầu Làm Bài
-                    </button>
-                </form>
+                    </a>
+                </div>
             </div>
         </div>
     </div>

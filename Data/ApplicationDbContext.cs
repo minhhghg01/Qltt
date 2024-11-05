@@ -123,7 +123,7 @@ namespace Qltt.Data
             modelBuilder.Entity<Test>(entity =>
             {
                 entity.Property(e => e.TestName).HasMaxLength(100).IsRequired();
-                entity.Property(e => e.Date).IsRequired();
+                // entity.Property(e => e.Date).IsRequired();
             });
 
             // Cấu hình quan hệ giữa Student và Class

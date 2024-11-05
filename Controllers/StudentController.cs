@@ -1,5 +1,3 @@
-
-
 using System.Security.Claims;
 using System.Text.Json;
 using Microsoft.AspNetCore.Authorization;
@@ -14,10 +12,12 @@ namespace Qltt.Controllers
     public class StudentController : Controller
     {
         private readonly ApplicationDbContext _context;
+        private readonly ILogger<StudentController> _logger;
 
-        public StudentController(ApplicationDbContext context)
+        public StudentController(ApplicationDbContext context, ILogger<StudentController> logger)
         {
             _context = context;
+            _logger = logger;
         }
 
         public async Task<IActionResult> Index()
@@ -27,34 +27,41 @@ namespace Qltt.Controllers
             return View(user);
         }
 
-        public async Task<IActionResult> Tests()
+        public IActionResult Tests()
         {
-            var studentId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-            var tests = await _context.Tests
-                .Include(t => t.StudentTests)
-                .Where(t => t.Date.Date >= DateTime.Today)
-                .ToListAsync();
-
-            return View(tests);
+            return View();
         }
 
-        public async Task<IActionResult> Start(int testId)
+        [HttpGet]
+        public async Task<IActionResult> Start(int testId = 3)
         {
-            // var studentId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)?.Value);
+            try
+            {
+                _logger.LogInformation($"Fetching questions for TestId={testId}, ClassId=1");
 
-            // // Lấy 10 câu hỏi ngẫu nhiên
-            // var questions = await _context.Questions
-            //     .OrderBy(r => Guid.NewGuid())
-            //     .Take(10)
-            //     .ToListAsync();
+                var questions = await _context.Questions
+                    .Include(q => q.Test)
+                    .Where(q => q.TestId == testId && q.Test.ClassId == 1)
+                    .OrderBy(r => Guid.NewGuid())
+                    .Take(10)
+                    .ToListAsync();
 
-            // // Lưu thông tin vào Session để kiểm tra khi nộp bài
-            // HttpContext.Session.SetString("TestQuestions", JsonSerializer.Serialize(questions));
-            // HttpContext.Session.SetInt32("TestId", testId);
-            // HttpContext.Session.SetString("StartTime", DateTime.Now.ToString());
+                if (!questions.Any())
+                {
+                    _logger.LogWarning($"No questions found for TestId={testId}, ClassId=1");
+                    TempData["Error"] = "Không tìm thấy câu hỏi nào!";
+                    return RedirectToAction("Tests");
+                }
 
-            // return View(questions);
-            return View();
+                _logger.LogInformation($"Found {questions.Count} questions");
+                return View(questions);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError($"Error: {ex.Message}");
+                TempData["Error"] = "Có lỗi xảy ra: " + ex.Message;
+                return RedirectToAction("Tests");
+            }
         }
 
         [HttpPost]
