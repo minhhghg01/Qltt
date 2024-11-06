@@ -15,9 +15,13 @@
             @for (int i = 1; i <= Model.PageCount; i++)
             {
                 <li class="page-item @(i == Model.PageNumber ? "active" : "")">
-                    <a class="page-link" asp-action="ManageStudents" asp-route-page="@i"
-                        asp-route-pageSize="@Model.PageSize">@i</a>
-                </li>
+                <a class="page-link" asp-action="ManageStudents" 
+                   asp-route-page="@i"
+                   asp-route-sortOrder="@ViewBag.CurrentSort"
+                   asp-route-pageSize="@Model.PageSize">
+                   @i
+                </a>
+            </li>
             }
         </ul>
     </nav>
@@ -33,15 +37,11 @@
                 <form method="get" asp-action="ManageStudents" class="d-inline w-auto">
                     <div class="d-flex align-items-center">
                         <label for="sortOrder" class="form-label me-0">Lớp:</label>
-                        <select name="sortOrder" id="sortOrder" class="form-select w-auto ms-auto"
-                            onchange="this.form.submit()">
-                            <option value="" selected="@(ViewBag.CurrentSort == "" ? "selected" : null)">Mặc định
-                            </option>
-                            <option value="class_asc"
-                                selected="@(ViewBag.CurrentSort == "class_asc" ? "selected" : null)">Tăng dần</option>
-                            <option value="class_desc"
-                                selected="@(ViewBag.CurrentSort == "class_desc" ? "selected" : null)">Giảm dần</option>
-                        </select>
+                        <select name="sortOrder" id="sortOrder" class="form-select w-auto ms-auto" onchange="this.form.submit()">
+            <option value="" selected="@(ViewBag.CurrentSort == "" ? "selected" : null)">Mặc định</option>
+            <option value="class_asc" selected="@(ViewBag.CurrentSort == "class_asc" ? "selected" : null)">Tăng dần</option>
+            <option value="class_desc" selected="@(ViewBag.CurrentSort == "class_desc" ? "selected" : null)">Giảm dần</option>
+        </select>
                     </div>
                 </form>
             </th>

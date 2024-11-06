@@ -334,7 +334,11 @@ namespace Qltt.Controllers
         //------------------ Quản lý học sinh ------------------
         public async Task<IActionResult> ManageStudents(string sortOrder, int page = 1, int pageSize = 10)
         {
-            ViewBag.ClassSortParam = sortOrder == "class_asc" ? "class_desc" : "class_asc";
+            if (string.IsNullOrEmpty(sortOrder))
+            {
+                sortOrder = "";
+            }
+            ViewBag.ClassSortParam = sortOrder;
             ViewBag.CurrentSort = sortOrder; // Để lưu trữ trạng thái hiện tại và hiển thị trong view
 
             // Truy vấn ban đầu với Include
@@ -361,9 +365,6 @@ namespace Qltt.Controllers
             var pagedStudents = students.ToPagedList(page, pageSize);
             return View(pagedStudents);
         }
-
-
-
 
         // Get Add Student
         public IActionResult AddStudent() { return View(); }
