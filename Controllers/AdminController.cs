@@ -150,7 +150,7 @@ namespace Qltt.Controllers
                 return NotFound();
             }
 
-            classEdit.ClassName = viewModel.ClassName;;
+            classEdit.ClassName = viewModel.ClassName; ;
 
             // Nếu teacherId có giá trị, chỉ định giáo viên vào lớp
             if (viewModel.TeacherId.HasValue)
@@ -332,15 +332,37 @@ namespace Qltt.Controllers
 
 
         //------------------ Quản lý học sinh ------------------
-        public async Task<IActionResult> ManageStudents(int page = 1, int pageSize = 10)
+        public async Task<IActionResult> ManageStudents(string sortOrder, int page = 1, int pageSize = 10)
         {
-            var students = await _context.Students
+            ViewBag.ClassSortParam = sortOrder == "class_asc" ? "class_desc" : "class_asc";
+            ViewBag.CurrentSort = sortOrder; // Để lưu trữ trạng thái hiện tại và hiển thị trong view
+
+            // Truy vấn ban đầu với Include
+            var students = _context.Students
                 .Include(s => s.Class)
                 .Include(s => s.User)
-                .ToListAsync();
+                .AsQueryable(); // Đảm bảo truy vấn là IQueryable để có thể sắp xếp
+
+            // Sắp xếp theo tên lớp
+            switch (sortOrder)
+            {
+                case "class_asc":
+                    students = students.OrderBy(s => s.Class.ClassName);
+                    break;
+                case "class_desc":
+                    students = students.OrderByDescending(s => s.Class.ClassName);
+                    break;
+                default:
+                    // Giữ nguyên thứ tự mặc định
+                    break;
+            }
+
+            // Phân trang
             var pagedStudents = students.ToPagedList(page, pageSize);
             return View(pagedStudents);
         }
+
+
 
 
         // Get Add Student
