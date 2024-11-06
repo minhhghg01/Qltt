@@ -3,78 +3,100 @@
 <div class="container mt-5">
     <div class="row justify-content-center">
         <div class="col-md-8">
-            <div class="test-container">
-                <h2 class="text-center mb-4" style="color: #2c3e50; font-weight: bold;">Kết quả bài kiểm tra</h2>
-                
-                <div class="test-info-box mb-4">
-                    <div class="score-info">
-                        <i class="fas fa-trophy"></i>
-                        <span>Điểm số: 100</span>
-                    </div>
-                    <div class="question-info">
-                        <i class="fas fa-question"></i>
-                        <span>Thời gian bắt đầu: 5/11/2024 10:00</span>
-                    </div>
-                    <div class="time-info">
-                        <i class="fas fa-clock"></i>
-                        <span>Thời gian nộp bài: 5/11/2024 10:10</span>
+            <div class="result-container">
+                <div class="result-header text-center">
+                    <h2>Kết Quả Bài Kiểm Tra</h2>
+                </div>
+
+                <div class="score-display">
+                    <div class="score-circle @(Model.Score >= 50 ? "pass" : "fail")">
+                        <span class="score-number">@(Model.Score.ToString("F0"))</span>
+                        <span class="score-label">điểm</span>
                     </div>
                 </div>
 
-                <form asp-action="Tests" class="mt-4">
-                    <button type="submit" class="btn-start w-100">
-                        <i class="fas fa-play-circle"></i> Làm lại
-                    </button>
-                </form>
+                <div class="result-details">
+                    <div class="detail-item">
+                        <i class="fas fa-award @(Model.Score >= 50 ? "text-success" : "text-danger")"></i>
+                        <span>Kết quả: @(Model.Score >= 50 ? "Đạt" : "Chưa đạt")</span>
+                    </div>
+                </div>
+
+                <div class="action-buttons text-center mt-4">
+                    <a asp-action="Tests" class="btn btn-primary">
+                        <i class="fas fa-redo"></i> Làm lại
+                    </a>
+                </div>
             </div>
         </div>
     </div>
 </div>
 
 <style>
-    .test-container {
+    .result-container {
         background: white;
         padding: 2rem;
         border-radius: 15px;
         box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
     }
 
-    .test-info-box {
+    .result-header {
         background: #f8f9fa;
         border-radius: 10px;
         padding: 1.5rem;
     }
 
-    .score-info, .question-info, .time-info, .note-info {
-        padding: 10px 0;
+    .score-display {
+        text-align: center;
+        margin-bottom: 2rem;
+    }
+
+    .score-circle {
+        width: 100px;
+        height: 100px;
+        border-radius: 50%;
+        display: inline-block;
+        text-align: center;
+        line-height: 100px;
+        font-size: 1.5rem;
+        font-weight: bold;
+        margin-right: 20px;
+    }
+
+    .score-number {
+        font-size: 2rem;
+        color: white;
+    }
+
+    .score-label {
+        font-size: 1rem;
+        color: white;
+    }
+
+    .pass {
+        background-color: #28a745;
+    }
+
+    .fail {
+        background-color: #dc3545;
+    }
+
+    .result-details {
+        text-align: center;
+        margin-bottom: 2rem;
+    }
+
+    .detail-item {
+        font-size: 1.2rem;
         color: #2c3e50;
-        font-size: 1.1rem;
+        margin-bottom: 10px;
     }
 
-    .score-info i {
-        color: #f1c40f;
+    .action-buttons {
+        text-align: center;
     }
 
-    .time-info i {
-        color: #3498db;
-    }
-
-    .note-info i {
-        color: #e74c3c;
-    }
-
-    .score-info i, .question-info i, .time-info i, .note-info i {
-        margin-right: 10px;
-        width: 20px;
-    }
-
-    .note-info {
-        font-style: italic;
-        font-size: 0.9rem;
-        color: #7f8c8d;
-    }
-
-    .btn-start {
+    .btn {
         background: linear-gradient(135deg, #3498db 0%, #2980b9 100%);
         color: white;
         border: none;
@@ -86,18 +108,18 @@
         cursor: pointer;
     }
 
-    .btn-start:hover {
+    .btn:hover {
         background: linear-gradient(135deg, #2980b9 0%, #2573a7 100%);
         transform: translateY(-2px);
         box-shadow: 0 5px 15px rgba(41, 128, 185, 0.3);
     }
 
-    .btn-start i {
+    .btn i {
         margin-right: 8px;
     }
 
     /* Animation khi load trang */
-    .test-container {
+    .result-container {
         animation: slideIn 0.5s ease-out;
     }
 

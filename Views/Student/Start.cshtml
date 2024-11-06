@@ -166,43 +166,32 @@
             const totalQuestions = @Model?.Count;
             const correctCount = correctAnswers.size;
             const testId = @Model.FirstOrDefault()?.TestId;
-
-            // Log ra console để debug
-            console.log('Số câu đúng:', correctCount);
-            console.log('Tổng số câu:', totalQuestions);
-            console.log('TestId:', testId);
-
+            
             if (confirm(`Bạn đã làm đúng ${correctCount}/${totalQuestions} câu.\nBạn có chắc chắn muốn nộp bài?`)) {
-                // Log dữ liệu gửi đi
-                const submitData = {
-                    correctCount: correctCount,
-                    totalQuestions: totalQuestions,
-                    testId: testId
-                };
-                console.log('Dữ liệu gửi đi:', submitData);
-
                 fetch('@Url.Action("Submit", "Student")', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json'
                     },
-                    body: JSON.stringify(submitData)
-                })
-                    .then(response => {
-                        console.log('Response status:', response.status);
-                        if (!response.ok) {
-                            return response.text().then(text => {
-                                throw new Error(text);
-                            });
-                        }
-                        window.location.href = '@Url.Action("Result", "Student")';
-
+                    body: JSON.stringify({
+                        correctCount: correctCount,
+                        totalQuestions: totalQuestions,
+                        testId: testId
                     })
-                    .catch(error => {
-                        console.error('Chi tiết lỗi:', error);
-                        alert('Có lỗi xảy ra khi nộp bài: ' + error.message);
-                    });
-
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success && data.redirectUrl) {
+                        window.location.href = data.redirectUrl;  // Sử dụng URL được trả về từ server
+                    } else {
+                        alert('Có lỗi xảy ra: ' + (data.message || 'Unknown error'));
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    alert('Có lỗi xảy ra khi nộp bài');
+                });
+                
                 return false;
             }
             return false;

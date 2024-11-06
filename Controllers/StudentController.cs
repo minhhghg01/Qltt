@@ -67,8 +67,8 @@ namespace Qltt.Controllers
         [HttpPost]
         public async Task<IActionResult> Submit([FromBody] SubmitModel model)
         {
-            // try 
-            // {
+            try 
+            {
                 var userId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)?.Value ?? "0");
                 var student = await _context.Students.FirstOrDefaultAsync(s => s.UserId == userId);
 
@@ -89,29 +89,43 @@ namespace Qltt.Controllers
                 _context.StudentTests.Add(studentTest);
                 await _context.SaveChangesAsync();
 
-                return RedirectToAction("Result", new { id = studentTest.StudentTestId });
+                // Trả về URL để redirect
+                var resultUrl = Url.Action("Result", "Student", new { id = studentTest.StudentTestId });
+                return Json(new { success = true, redirectUrl = resultUrl });
             }
-            // catch (Exception ex)
-            // {
-            //     // Log chi tiết lỗi
-            //     Console.WriteLine($"Error details: {ex.Message}");
-            //     Console.WriteLine($"Inner exception: {ex.InnerException?.Message}");
-            //     return BadRequest(ex.InnerException?.Message ?? ex.Message);
-            // }
-        // }
+            catch (Exception ex)
+            {
+                // Log chi tiết lỗi
+                Console.WriteLine($"Error details: {ex.Message}");
+                Console.WriteLine($"Inner exception: {ex.InnerException?.Message}");
+                return BadRequest(ex.InnerException?.Message ?? ex.Message);
+            }
+        }
 
         public async Task<IActionResult> Result(int id)
         {
-            // var studentTest = await _context.StudentTests
-            //     .Include(st => st.Test)
-            //     .FirstOrDefaultAsync(st => st.StudentTestId == id);
+            try
+            {
+                // Lấy kết quả bài thi từ database
+                var studentTest = await _context.StudentTests
+                    .Include(st => st.Test)  // Include thêm thông tin của Test nếu cần
+                    .FirstOrDefaultAsync(st => st.StudentTestId == id);
 
-            // if (studentTest == null)
-            // {
-            //     return NotFound();
-            // }
+                if (studentTest == null)
+                {
+                    return NotFound("Không tìm thấy kết quả bài kiểm tra!");
+                }
 
-            return View();
+                // Log để debug
+                Console.WriteLine($"Found StudentTest: Id={studentTest.StudentTestId}, Score={studentTest.Score}");
+
+                return View(studentTest);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error in Result action: {ex.Message}");
+                return RedirectToAction("Tests");
+            }
         }
     }
 
