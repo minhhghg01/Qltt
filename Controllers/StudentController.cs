@@ -27,9 +27,33 @@ namespace Qltt.Controllers
             return View(user);
         }
 
-        public IActionResult Tests()
+        public async Task<IActionResult> Tests()
         {
-            return View();
+            try
+            {
+                // Lấy classId từ student hiện tại
+                var userId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)?.Value ?? "0");
+                var student = await _context.Students
+                    .FirstOrDefaultAsync(s => s.UserId == userId);
+
+                if (student == null)
+                {
+                    return NotFound("Không tìm thấy thông tin học sinh!");
+                }
+
+                // Lấy danh sách bài test của lớp đó
+                var tests = await _context.Tests
+                    .Where(t => t.ClassId == student.ClassId)
+                    .OrderBy(t => t.TestId)
+                    .ToListAsync();
+
+                return View(tests);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error: {ex.Message}");
+                return View(new List<Test>());
+            }
         }
 
         [HttpGet]
